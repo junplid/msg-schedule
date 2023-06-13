@@ -2,7 +2,6 @@ import "./styles.scss";
 import { FormEvent, useCallback, useState } from "react";
 import { LoadComponent } from "../../components/load";
 import { Link, useNavigate } from "react-router-dom";
-import MessageSvg from "../../assets/mobile_message.svg";
 
 export default function PageLogin() {
   const [load, setLoad] = useState<boolean>(false as boolean);
@@ -22,7 +21,7 @@ export default function PageLogin() {
     <div className="min-h-screen px-4 flex items-center justify-center bg-image">
       <div className="flex bg-2 shadow-md">
         <img
-          src={MessageSvg}
+          src={"/mobile_message.svg"}
           alt="svg"
           className="md:block hidden img_message p-10"
         />

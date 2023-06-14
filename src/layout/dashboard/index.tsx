@@ -5,7 +5,7 @@ export default function LayoutDashboard() {
   return (
     <div className="flex">
       <LayoutDashboardComponentAside />
-      <div className="flex-1">
+      <div className="flex-1 p-11">
         <Outlet />
       </div>
     </div>

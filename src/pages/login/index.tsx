@@ -12,7 +12,7 @@ export default function PageLogin() {
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoad(!load);
-      setTimeout(() => navigate("/painel"), 3000);
+      setTimeout(() => navigate("/panel"), 3000);
     },
     [load, navigate]
   );

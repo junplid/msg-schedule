@@ -38,7 +38,11 @@ function CollapseItem(props: PropsCollapse_I) {
           </div>
           <span className="text-lg">{props.label}</span>
         </div>
-        <div className={`icon duration-200 ${isExpanded ? "rotate-180" : ""}`}>
+        <div
+          className={`icon-aside duration-200 ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+        >
           <HiChevronDown />
         </div>
       </button>

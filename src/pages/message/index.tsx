@@ -1,7 +1,7 @@
 export default function PageMessageWhatsApp() {
   return (
     <div>
-      <h3 className="font-bold text-xl">Menssagens</h3>
+      <h3 className="font-bold text-xl">Mensagens</h3>
 
       <div className="mt-6 bg-6">
         <div className="p-4 px-5 flex justify-between items-center bg-7">

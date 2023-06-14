@@ -1,10 +1,13 @@
 import { Outlet } from "react-router-dom";
+import LayoutDashboardComponentAside from "./components/aside";
 
 export default function LayoutDashboard() {
   return (
-    <div>
-      <aside>ASIDE</aside>
-      <Outlet />
+    <div className="flex">
+      <LayoutDashboardComponentAside />
+      <div className="flex-1">
+        <Outlet />
+      </div>
     </div>
   );
 }

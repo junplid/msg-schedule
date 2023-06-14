@@ -6,16 +6,17 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
-    backgroundColor: {
-      "1": "#000706",
-      "2": "#00272d",
-      "3": "#134647",
-      "4": "#0c7e7e",
-      "5": "#EBF1F2",
-      "6": "#fdfdfd",
-      "7": "rgba(3, 105, 161, 1)"
-    }
+    extend: {
+      backgroundColor: {
+        "1": "#000706",
+        "2": "#00272d",
+        "3": "#134647",
+        "4": "#0c7e7e",
+        "5": "#EBF1F2",
+        "6": "#fdfdfd",
+        "7": "rgba(3, 105, 161, 1)"
+      }
+    },
   },
   plugins: [],
 }

@@ -21,7 +21,7 @@ export default function PageLogin() {
     <div className="min-h-screen px-4 flex items-center justify-center bg-image">
       <div className="flex bg-2 shadow-md">
         <img
-          src={"/mobile_message.svg"}
+          src={"/mobile_message.png"}
           alt="svg"
           className="md:block hidden img_message p-10"
         />

@@ -33,7 +33,6 @@ export function useLogin() {
       } catch (error) {
         setLoad(false);
         if (error instanceof AxiosError) {
-          console.log("Error axios", error.response);
           setError(error.response?.data?.body[0]);
           return;
         }

@@ -37,7 +37,7 @@ export default function PageRegister() {
   const { error, handleValues, load, sucess, onSubmit } = useRegister();
 
   return (
-    <div className="min-h-screen px-4 flex items-center justify-center bg-image">
+    <div className="min-h-screen py-5 px-4 flex items-center justify-center bg-image">
       <div className="w-full flex justify-center fixed bottom-0 left-0">
         <div
           className={`bg-3 duration-200 ${

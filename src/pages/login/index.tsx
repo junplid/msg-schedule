@@ -1,37 +1,61 @@
 import "./styles.scss";
 import { LoadComponent } from "../../components/load";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "../../hooks/authLogin.hook";
-import { useSelector } from "react-redux";
-import { propsRootReducer } from "../../reducers";
-import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { Dispatch, useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
+import { propsAuthActions } from "../../reducers/auth.reducer";
+import mainAPI from "../../providers/api.provider";
 
 export default function PageLogin() {
   const { error, handleValues, load, onSubmit } = useLogin();
   const [loadPage, setLoadPage] = useState<boolean>(false as boolean);
-  const { auth } = useSelector((state: propsRootReducer) => state);
+  const [cookies, _setCookies, removeCookie] = useCookies(["auth"]);
+  const dispatch: Dispatch<propsAuthActions> = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (auth.isAuthenticated) {
-      // verificar o token
-      // manda para o painel
-    } else {
-      // buscar o token no cookie
+    if (cookies.auth) {
+      (async () => {
+        try {
+          const { data } = await mainAPI.get(
+            `/v1/public/get/verify-token/${cookies.auth}`
+          );
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              token: cookies.auth,
+              full_name: data.data.full_name,
+              type: data.data.type,
+            },
+          });
+          navigate("/panel");
+        } catch (error) {
+          dispatch({ type: "LOGOUT" });
+          removeCookie("auth");
+          setTimeout(() => setLoadPage(true), 1200);
+        }
+      })();
+      return;
     }
-    setLoadPage(true);
+    setTimeout(() => setLoadPage(true), 400);
   }, []);
 
   return (
-    <div className="min-h-screen py-5 px-4 flex items-center justify-center bg-image">
-      <div className="flex bg-2 shadow-md">
-        <img
-          src={"/mobile_message.png"}
-          alt="svg"
-          className="md:block hidden img_message p-10"
-        />
-        {!loadPage ? (
-          <div>Carregando</div>
-        ) : (
+    <div className="min-h-screen py-5 px-4 flex items-center justify-center">
+      {!loadPage ? (
+        <div className="p-4 bg-3 flex items-center flex-col gap-3">
+          <span className="text-slate-50 font-medium text-lg">Aguarde</span>
+          <LoadComponent />
+        </div>
+      ) : (
+        <div className="flex bg-2 shadow-md">
+          <img
+            src={"/mobile_message.png"}
+            alt="svg"
+            className="md:block hidden img_message p-10"
+          />
           <div className="bg-5 p-10 py-8 flex flex-col justify-between gap-4 min-h-full">
             <div>
               <h1 className="font-medium text-2xl text-center text-slate-700">
@@ -108,8 +132,8 @@ export default function PageLogin() {
               </p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

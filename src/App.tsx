@@ -6,12 +6,14 @@ import LayoutDashboard from "./layout/dashboard";
 import PageMySectionWhatsApp from "./pages/my-section";
 import PageMessageWhatsApp from "./pages/message";
 import PageShotsWhatsApp from "./pages/shots";
+import PageRegister from "./pages/register";
 
 export default function App() {
   return (
     <Routes>
       <Route path="*" element={<Page404 />} />
       <Route path="/" element={<PageLogin />} />
+      <Route path="/register" element={<PageRegister />} />
       <Route path="/" element={<LayoutDashboard />}>
         <Route path="/panel" element={<PagePanel />} />
         <Route

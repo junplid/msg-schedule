@@ -16,7 +16,7 @@ export default function PageLogin() {
         />
         <div className="bg-5 p-10 py-8 flex flex-col justify-between gap-4 min-h-full">
           <div>
-            <h1 className="font-medium text-2xl text-center text-slate-700">
+            <h1 className="font-bold text-2xl text-center text-slate-700">
               Faça login na sua conta
             </h1>
           </div>
@@ -84,7 +84,7 @@ export default function PageLogin() {
           <div>
             <p className="text-slate-700 text-base text-center">
               Não tem conta?{" "}
-              <Link className="text-cyan-800 font-medium" to={"/register"}>
+              <Link className="text-cyan-800 font-medium" to={"/"}>
                 registre-se
               </Link>
             </p>

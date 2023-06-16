@@ -1,20 +1,29 @@
 import "./styles.scss";
 import { FormEvent, useCallback, useState } from "react";
 import { LoadComponent } from "../../components/load";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import useAuth from "../../hooks/auth.hook";
+import { useDispatch } from "react-redux";
+
+interface propsFields {
+  email: string;
+  password: string;
+}
 
 export default function PageLogin() {
-  const [load, setLoad] = useState<boolean>(false as boolean);
+  const { login } = useAuth({ dispatch: useDispatch() });
 
-  const navigate = useNavigate();
+  const [load, setLoad] = useState<boolean>(false as boolean);
+  const [fields, setFields] = useState<propsFields>({} as propsFields);
 
   const submit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
+    async (e: FormEvent<HTMLFormElement>, data: propsFields) => {
+      setLoad(true);
       e.preventDefault();
-      setLoad(!load);
-      setTimeout(() => navigate("/panel"), 3000);
+      await login(data);
+      setLoad(false);
     },
-    [load, navigate]
+    [login]
   );
 
   return (
@@ -33,7 +42,7 @@ export default function PageLogin() {
           </div>
           <form
             className="flex flex-col gap-11 items-baseline justify-between flex-1"
-            onSubmit={submit}
+            onSubmit={(e) => submit(e, fields)}
           >
             <div className="grid gap-y-3">
               <label className="flex flex-col gap-y-2">
@@ -44,6 +53,10 @@ export default function PageLogin() {
                   placeholder="xxx@xxx.xxx"
                   className="py-3 px-4 shadow-sm w-full outline-none"
                   type="text"
+                  name="email"
+                  onChange={(e) =>
+                    setFields({ ...fields, [e.target.name]: e.target.value })
+                  }
                 />
               </label>
               <label className="flex flex-col gap-y-2">
@@ -54,6 +67,10 @@ export default function PageLogin() {
                   className="py-3 px-4 shadow-sm w-full outline-none"
                   type="password"
                   placeholder="*****"
+                  name="password"
+                  onChange={(e) =>
+                    setFields({ ...fields, [e.target.name]: e.target.value })
+                  }
                 />
               </label>
             </div>

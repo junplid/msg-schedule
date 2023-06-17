@@ -32,11 +32,7 @@ export function useLogin() {
         setLoad(false);
         dispatch({
           type: "LOGIN",
-          payload: {
-            token: data.data.token,
-            full_name: data.data.full_name,
-            type: data.data.type,
-          },
+          payload: data.data,
         });
         setCookies("auth", data.data.token, {
           maxAge: 2147483647,

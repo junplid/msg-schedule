@@ -26,8 +26,7 @@ export default function PageLogin() {
             type: "LOGIN",
             payload: {
               token: cookies.auth,
-              full_name: data.data.full_name,
-              type: data.data.type,
+              ...data.data,
             },
           });
           navigate("/panel");

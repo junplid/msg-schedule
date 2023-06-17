@@ -1,3 +1,7 @@
 export default function PagePanel() {
-  return <div>painel autenticado </div>;
+  return (
+    <div>
+      <p>painel autenticado</p>
+    </div>
+  );
 }

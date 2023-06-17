@@ -1,0 +1,24 @@
+@keyframes anima {
+  0% {
+    transform: translateY(-10px);
+  opacity: 0;
+}
+
+  100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+.anima {
+  transform: translateY(-10px);
+  opacity: 0;
+  animation: anima 200ms ease forwards;
+}
+
+.icon-2 {
+  svg {
+    min-width: 23px;
+    min-height: 23px;
+  }
+}

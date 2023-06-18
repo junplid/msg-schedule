@@ -86,7 +86,7 @@ export default function LayoutDashboardComponentAside() {
             pathname === "/panel" ? "text-sky-700" : ""
           } flex duration-200 w-full py-1 items-center`}
         >
-          <div className="w-6 items-center flex icon-2">
+          <div className="w-6 items-center flex icon-4">
             <MdOutlineDashboard />
           </div>
           <span className="text-lg">Dashboard</span>

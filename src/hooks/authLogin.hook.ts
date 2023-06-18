@@ -37,8 +37,8 @@ export function useLogin() {
         setCookies("auth", data.data.token, {
           maxAge: 2147483647,
           path: "/",
-          sameSite: "strict",
         });
+        mainAPI.defaults.headers.common.authorization = `BEARER ${data.data.token}`;
         navigate("/panel");
       } catch (error) {
         setLoad(false);

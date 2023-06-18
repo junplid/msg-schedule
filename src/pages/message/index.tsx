@@ -1,8 +1,18 @@
 import "./styles.scss";
-import { useCallback, useState } from "react";
+import { Dispatch, useCallback, useEffect, useState } from "react";
 import { useCollapse } from "react-collapsed";
 import { HiChevronDown } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
+import mainAPI from "../../providers/api.provider";
+import { AxiosError } from "axios";
+import { Message } from "../../entities/message.entity";
+import { AiFillDelete } from "react-icons/ai";
+import Skeleton from "react-loading-skeleton";
+import { propsAuthActions } from "../../reducers/auth.reducer";
+import { useDispatch } from "react-redux";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
+import { produce } from "immer";
 
 interface propsField_I {
   text?: string;
@@ -14,9 +24,7 @@ interface propsModal {
   label: string;
   type: "EDIT" | "ADD";
   initValues?: propsField_I;
-  actions: {
-    onCreate(fields: propsField_I): Promise<void>;
-  };
+  actions(fields: Required<Omit<propsField_I, "id">>): Promise<void>;
 }
 
 const ModalCreate = (props: propsModal): JSX.Element => {
@@ -118,9 +126,9 @@ const ModalCreate = (props: propsModal): JSX.Element => {
             </button>
             <button
               onClick={() =>
-                props.actions?.onCreate({
-                  ...fields,
-                  days: Number(String(fields.days).replace(/\D/g, "")),
+                props.actions({
+                  text: fields.text!,
+                  days: Number(String(fields.days).replace(/\D/g, ""))!,
                 })
               }
               className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
@@ -140,23 +148,176 @@ const ModalCreate = (props: propsModal): JSX.Element => {
 };
 
 export default function PageMessageWhatsApp() {
-  const [openModalEdit, setOpenModalEdit] = useState(false);
-  const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [_cookies, _setCookies, removeCookie] = useCookies(["auth"]);
+  const dispatch: Dispatch<propsAuthActions> = useDispatch();
+  const navigate = useNavigate();
 
-  const onCreate = useCallback(async (fields: propsField_I) => {
+  const [openModalEdit, setOpenModalEdit] = useState<null | Message>(
+    null as null | Message
+  );
+  const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([] as Message[]);
+  const [loadGet, setLoadGet] = useState<boolean>(false as boolean);
+  const [loadDell, setLoadDell] = useState<number[]>([] as number[]);
+
+  // const auth = useSelector(
+  //   (state: any): propsInitialState => state._root.entries[0][1]
+  // );
+
+  const onList = useCallback(async () => {
     try {
-      console.log(fields);
-    } catch (error) {}
+      const { data } = await mainAPI.get("/v1/user/get/messages");
+      setMessages(data.data);
+      setTimeout(() => setLoadGet(true), 600);
+    } catch (error) {
+      setLoadGet(false);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          dispatch({ type: "LOGOUT" });
+          removeCookie("auth", {
+            maxAge: 2147483647,
+            path: "/",
+          });
+          navigate("/");
+          return;
+        }
+        return;
+      }
+      console.log(error);
+    }
+  }, []);
+
+  const onCreate = useCallback(async (fields: Required<propsField_I>) => {
+    try {
+      const { data } = await mainAPI.post("/v1/user/create/message", fields);
+      setOpenModalCreate(false);
+      setTimeout(
+        () =>
+          setMessages([
+            ...messages,
+            {
+              ...fields,
+              id: data.data.id,
+            },
+          ]),
+        300
+      );
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          dispatch({ type: "LOGOUT" });
+          removeCookie("auth", {
+            maxAge: 2147483647,
+            path: "/",
+          });
+          navigate("/");
+          return;
+        }
+        return;
+      }
+      console.log(error);
+    }
+  }, []);
+
+  const onEdit = useCallback(
+    async (fields: propsField_I) => {
+      try {
+        await mainAPI.put(
+          `/v1/user/update/change-field-message/${openModalEdit?.id}?text=${fields.text}&days=${fields.days}`
+        );
+        alert("Editado com sucesso!");
+        setOpenModalEdit(null);
+        const newMessages = produce(messages, (draft) => {
+          draft.map((msg) => {
+            if (msg.id === openModalEdit?.id) {
+              if (fields.days !== undefined) {
+                msg.days = fields.days;
+              }
+              if (fields.text !== undefined) {
+                msg.text = fields.text;
+              }
+              return msg;
+            }
+            return msg;
+          });
+        });
+        setMessages(newMessages);
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 401) {
+            dispatch({ type: "LOGOUT" });
+            removeCookie("auth", {
+              maxAge: 2147483647,
+              path: "/",
+            });
+            navigate("/");
+            return;
+          }
+          return;
+        }
+        console.log(error);
+      }
+    },
+    [openModalEdit?.id]
+  );
+
+  const onDelete = useCallback(
+    async (id: number) => {
+      try {
+        if (confirm("Deseja deletar essa mensagem permanentemente?")) {
+          setLoadDell([...loadDell, id]);
+          await mainAPI.delete(`/v1/user/delete/message/${id}`);
+          setOpenModalCreate(false);
+          setMessages(messages.filter((e) => e.id !== id));
+          setLoadDell(loadDell.filter((e) => e !== id));
+        }
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 400) {
+            alert(error.response.data.body[0].message);
+            setMessages(messages.filter((e) => e.id !== id));
+            setLoadDell(loadDell.filter((e) => e !== id));
+            return;
+          }
+
+          if (error.response?.status === 401) {
+            dispatch({ type: "LOGOUT" });
+            removeCookie("auth", {
+              maxAge: 2147483647,
+              path: "/",
+            });
+            navigate("/");
+            return;
+          }
+          return;
+        }
+        console.log(error);
+      }
+    },
+    [loadDell, messages]
+  );
+
+  useEffect(() => {
+    onList();
   }, []);
 
   return (
     <div>
       {openModalCreate && (
         <ModalCreate
-          actions={{ onCreate }}
+          actions={onCreate}
           type="ADD"
           label="Criar nova mensagem de vencimento"
           setModal={setOpenModalCreate}
+        />
+      )}
+      {openModalEdit && (
+        <ModalCreate
+          actions={onEdit}
+          type="EDIT"
+          label="Editar mensagem de vencimento"
+          setModal={(vl) => !vl && setOpenModalEdit(null)}
+          initValues={openModalEdit}
         />
       )}
       <h3 className="font-bold text-xl">Mensagens</h3>
@@ -167,70 +328,73 @@ export default function PageMessageWhatsApp() {
             Mensagens automáticas de vencimento
           </h4>
           <button
-            onClick={() => setOpenModalCreate(true)}
+            onClick={() => {
+              setOpenModalCreate(true);
+              setOpenModalEdit(null);
+            }}
             className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
           >
             Adicionar nova mensagem
           </button>
         </div>
-        <table className="shadow-md bg-white w-full">
-          <tbody>
-            <tr className="border-b last:border-0 hover:bg-slate-100 cursor-pointer">
-              <td className="pl-8 pr-4 py-4">
-                <div>
-                  <h3 className="font-medium text-slate-700">
-                    Menssagem de 5 dias antes do vencimento
-                  </h3>
-                  <p className="text-slate-400 font-light">
-                    Mensagem será enviada Automáticamente 5 dias antes do
-                    vencimento
-                  </p>
-                </div>
-              </td>
-              <td align="right" className="pr-8 pl-4 py-4">
-                <span className="p-2 px-6 font-medium bg-red-100 text-sm text-red-600">
-                  Desativada
+        {!loadGet ? (
+          <Skeleton
+            borderRadius={0}
+            baseColor="#d4d7dc"
+            highlightColor="#f4f8ff"
+            width={"100%"}
+            height={80}
+          />
+        ) : (
+          <>
+            {messages.length > 0 ? (
+              <table className="shadow-md bg-white w-full">
+                <tbody>
+                  {messages.map((e) => (
+                    <tr
+                      onClick={() => {
+                        setOpenModalEdit(e);
+                      }}
+                      key={e.id}
+                      className={`${
+                        loadDell.includes(e.id) ? "opacity-70" : ""
+                      } duration-200 border-b last:border-0 hover:bg-slate-100 cursor-pointer`}
+                    >
+                      <td className="pl-8 pr-4 py-4">
+                        <div>
+                          <h3 className="font-medium text-slate-700">
+                            Menssagem de {e.days} dias antes do vencimento
+                          </h3>
+                          <p className="text-slate-400 font-light">
+                            Mensagem será enviada Automáticamente {e.days} dias
+                            antes do vencimento
+                          </p>
+                        </div>
+                      </td>
+                      <td align="right" className="pr-8 pl-4 py-4">
+                        <button
+                          disabled={loadDell.includes(e.id)}
+                          onClick={() =>
+                            !loadDell.includes(e.id) && onDelete(e.id)
+                          }
+                          className="hover:bg-red-500 duration-300 hover:text-red-50 p-2 px-6 font-medium bg-red-100 text-sm icon-3 text-red-600"
+                        >
+                          <AiFillDelete />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="h-20 flex justify-center items-center">
+                <span className="text-slate-600">
+                  Não há mensagens cadastradas
                 </span>
-              </td>
-            </tr>
-            <tr className="border-b last:border-0 hover:bg-slate-100 cursor-pointer">
-              <td className="pl-8 pr-4 py-4">
-                <div>
-                  <h3 className="font-medium text-slate-700">
-                    Menssagem de 5 dias antes do vencimento
-                  </h3>
-                  <p className="text-slate-400 font-light">
-                    Mensagem será enviada Automáticamente 5 dias antes do
-                    vencimento
-                  </p>
-                </div>
-              </td>
-              <td align="right" className="pr-8 pl-4 py-4">
-                <span className="p-2 px-6 font-medium bg-red-100 text-sm text-red-600">
-                  Desativada
-                </span>
-              </td>
-            </tr>
-            <tr className="border-b last:border-0 hover:bg-slate-100 cursor-pointer">
-              <td className="pl-8 pr-4 py-4">
-                <div>
-                  <h3 className="font-medium text-slate-700">
-                    Menssagem de 5 dias antes do vencimento
-                  </h3>
-                  <p className="text-slate-400 font-light">
-                    Mensagem será enviada Automáticamente 5 dias antes do
-                    vencimento
-                  </p>
-                </div>
-              </td>
-              <td align="right" className="pr-8 pl-4 py-4">
-                <span className="p-2 px-6 font-medium bg-red-100 text-sm text-red-600">
-                  Desativada
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

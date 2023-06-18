@@ -2,14 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { propsInitialState } from "../../reducers/auth.reducer";
 import { io } from "socket.io-client";
-import { QRCodeSVG } from "qrcode.react";
 import { LoadComponent } from "../../components/load";
 
 export default function PageMySectionWhatsApp() {
   const [isConnected, setIsConnected] = useState(false);
   const [isSessionOpen, setIsSessionOpen] = useState(false);
   const [isSessionConnected, setIsSessionConnected] = useState(false);
-  const [fooEvents, setFooEvents] = useState<any[]>([] as any[]);
   const [qrCode, setQrCode] = useState<string | null>(null as string | null);
   const [loadGetQrCode, setLoadGetQrCode] = useState(false);
 

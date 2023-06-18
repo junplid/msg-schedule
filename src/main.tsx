@@ -1,4 +1,5 @@
 import "./index.css";
+import 'react-loading-skeleton/dist/skeleton.css'
 import { StrictMode } from "react";
 import { BrowserRouter } from "react-router-dom";
 import ReactDOM from "react-dom/client";

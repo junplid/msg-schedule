@@ -57,6 +57,7 @@ export default function PageRegister() {
               token: cookies.auth,
               full_name: data.data.full_name,
               type: data.data.type,
+              key: data.data.key,
             },
           });
           navigate("/panel");

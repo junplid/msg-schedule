@@ -6,6 +6,7 @@ import "./styles.scss";
 import { IconType } from "react-icons";
 import { Link, useLocation } from "react-router-dom";
 import { MdOutlineDashboard } from "react-icons/md";
+import { FiServer } from "react-icons/fi";
 
 interface PropsCollapse_I {
   label: string;
@@ -73,7 +74,7 @@ export default function LayoutDashboardComponentAside() {
   const { pathname } = useLocation();
 
   return (
-    <aside className="w-52 pt-11 pb-5 px-3 bg-6 h-screen overflow-y-auto overflow-x-hidden">
+    <aside className="w-52 pt-11 pb-5 px-3 shadow-lg bg-6 h-screen overflow-y-auto overflow-x-hidden">
       <div className="mb-4">
         <h2 className="text-xl font-bold text-slate-700 text-center">
           MsgSchedule
@@ -91,11 +92,17 @@ export default function LayoutDashboardComponentAside() {
           </div>
           <span className="text-lg">Dashboard</span>
         </Link>
-        <CollapseItem
-          Icon={RiAdminLine}
-          itens={[{ link: "/panel/root/subscribers", value: "Assinantes" }]}
-          label="Root"
-        />
+        <Link
+          to={"/panel/products-plans"}
+          className={`group-hover:text-sky-700 ${
+            pathname === "/panel/products-plans" ? "text-sky-700" : ""
+          } flex duration-200 w-full py-1 items-center`}
+        >
+          <div className="w-6 items-center flex icon-4">
+            <FiServer />
+          </div>
+          <span className="text-lg">Produtos/Planos</span>
+        </Link>
         <CollapseItem
           Icon={AiOutlineWhatsApp}
           itens={[
@@ -104,6 +111,11 @@ export default function LayoutDashboardComponentAside() {
             { link: "/panel/whatsapp/shots", value: "Disparos" },
           ]}
           label="WhatsApp"
+        />
+        <CollapseItem
+          Icon={RiAdminLine}
+          itens={[{ link: "/panel/root/subscribers", value: "Assinantes" }]}
+          label="Root"
         />
       </div>
     </aside>

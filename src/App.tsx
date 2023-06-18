@@ -7,6 +7,7 @@ import PageMySectionWhatsApp from "./pages/my-section";
 import PageMessageWhatsApp from "./pages/message";
 import PageShotsWhatsApp from "./pages/shots";
 import PageRegister from "./pages/register";
+import PageProductsPlans from "./pages/products-plans";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/register" element={<PageRegister />} />
       <Route path="/" element={<LayoutDashboard />}>
         <Route path="/panel" element={<PagePanel />} />
+        <Route path="/panel/products-plans" element={<PageProductsPlans />} />
         <Route
           path="/panel/whatsapp/my-section"
           element={<PageMySectionWhatsApp />}

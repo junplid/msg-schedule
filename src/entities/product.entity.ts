@@ -1,11 +1,12 @@
 export interface Plans {
+  readonly id: number;
   name: string;
   price: number;
 }
 
-export interface Product {
+export interface Product<PlansI = Plans[]> {
   readonly id: number;
-  name?: string;
-  price?: number;
-  plans?: Plans[];
+  name: string;
+  price: number;
+  plans: PlansI;
 }

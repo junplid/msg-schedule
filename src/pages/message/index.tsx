@@ -141,7 +141,7 @@ const ModalCreate = (props: propsModal): JSX.Element => {
       </div>
       <div
         onClick={() => props.setModal(false)}
-        className="fixed top-0 left-0 w-screen h-screen bg-3 backdrop-blur-sm bg-white/30"
+        className="fixed top-0 left-0 w-screen h-screen bg-3 backdrop-blur-sm bg-teal-900/60"
       ></div>
     </div>
   );
@@ -323,7 +323,7 @@ export default function PageMessageWhatsApp() {
       <h3 className="font-bold text-xl">Mensagens</h3>
 
       <div className="mt-6 bg-6">
-        <div className="p-4 px-5 flex justify-between items-center bg-7">
+        <div className="p-4 px-5 flex justify-between items-center bg-teal-900">
           <h4 className="font-medium text-slate-50">
             Mensagens automáticas de vencimento
           </h4>

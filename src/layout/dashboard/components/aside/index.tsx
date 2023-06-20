@@ -5,7 +5,7 @@ import { HiChevronDown } from "react-icons/hi";
 import "./styles.scss";
 import { IconType } from "react-icons";
 import { Link, useLocation } from "react-router-dom";
-import { MdOutlineDashboard } from "react-icons/md";
+import { MdOutlineDashboard, MdOutlinePeopleAlt } from "react-icons/md";
 import { FiServer } from "react-icons/fi";
 
 interface PropsCollapse_I {
@@ -102,6 +102,17 @@ export default function LayoutDashboardComponentAside() {
             <FiServer />
           </div>
           <span className="text-lg">Produtos/Planos</span>
+        </Link>
+        <Link
+          to={"/panel/customer"}
+          className={`group-hover:text-sky-700 ${
+            pathname === "/panel/customer" ? "text-sky-700" : ""
+          } flex duration-200 w-full py-1 items-center`}
+        >
+          <div className="w-6 items-center flex icon-4">
+            <MdOutlinePeopleAlt />
+          </div>
+          <span className="text-lg">Clientes</span>
         </Link>
         <CollapseItem
           Icon={AiOutlineWhatsApp}

@@ -1,5 +1,7 @@
 import "./index.css";
-import 'react-loading-skeleton/dist/skeleton.css'
+import "react-date-picker/dist/DatePicker.css";
+import "react-calendar/dist/Calendar.css";
+import "react-loading-skeleton/dist/skeleton.css";
 import { StrictMode } from "react";
 import { BrowserRouter } from "react-router-dom";
 import ReactDOM from "react-dom/client";

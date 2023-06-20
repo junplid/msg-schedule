@@ -21,7 +21,7 @@ export default function PageMySectionWhatsApp() {
 
   const createSession = useCallback(() => {
     socket.emit("create-session", {
-      key: auth.user?.key,
+      key: String(auth.user?.id),
     });
     setLoadGetQrCode(true);
     setIsSessionOpen(true);
@@ -29,20 +29,20 @@ export default function PageMySectionWhatsApp() {
 
   const closeSession = useCallback(() => {
     socket.emit("close-session", {
-      key: auth.user?.key,
+      key: String(auth.user?.id),
     });
     setIsSessionOpen(false);
   }, []);
 
   useEffect(() => {
     try {
-      socket.on(auth.user?.key!, (data) => {
+      socket.on(String(auth.user?.id)!, (data) => {
         setQrCode(data);
         setLoadGetQrCode(false);
       });
       socket.on("connect", () => console.log(socket.id));
       socket.on("leave", (room) => {
-        if (room === auth.user?.key) {
+        if (room === String(auth.user?.id)) {
           setQrCode(null);
           setIsSessionOpen(false);
         }

@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import { Dispatch, useCallback, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import { IoIosAdd } from "react-icons/io";
+import { IoIosAdd, IoMdNotificationsOutline } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -10,8 +10,18 @@ import { propsAuthActions } from "../../reducers/auth.reducer";
 import { Plans, Product } from "../../entities/product.entity";
 import { produce } from "immer";
 import { BiSave } from "react-icons/bi";
+import { VscDebugRestart } from "react-icons/vsc";
 import Skeleton from "react-loading-skeleton";
 import { LoadComponent } from "../../components/load";
+import Select from "react-select";
+import DatePicker from "react-date-picker";
+import Switch from "react-switch";
+
+const options = [
+  { value: "chocolate", label: "Chocolate" },
+  { value: "strawberry", label: "Strawberry" },
+  { value: "vanilla", label: "Vanilla" },
+];
 
 interface propsField_I
   extends Partial<Omit<Product<(Plans & { id?: number })[]>, "id">> {}
@@ -61,8 +71,8 @@ const ModalCreate = (props: propsModal): JSX.Element => {
   }, []);
 
   return (
-    <div className="py-5 flex items-center flex- overflow-scroll overflow-x-hidden fixed top-0 left-0 w-screen h-screen">
-      <div className="max-w-2xl m-auto w-full bg-white shadow-lg relative z-10 anima">
+    <div className="py-5 flex items-center flex-col overflow-scroll overflow-x-hidden fixed top-0 left-0 w-screen h-full">
+      <div className="max-w-2xl w-full m-auto bg-white shadow-lg relative z-10 anima">
         <div className="p-5 bg-3 text-white flex justify-between items-center font-medium text-lg">
           <span>{props.label}</span>
           <button className="icon-2" onClick={() => props.setModal(false)}>
@@ -70,14 +80,14 @@ const ModalCreate = (props: propsModal): JSX.Element => {
           </button>
         </div>
         <div className="px-5">
-          <div className="my-5 flex gap-x-2">
+          <div className="my-2 flex gap-x-2">
             <label className="flex flex-1 gap-y-1 flex-col">
               <span className="text-slate-600">Nome</span>
               <input
                 className="pl-4 border h-12 outline-teal-700"
                 type="text"
                 name="name"
-                placeholder="Nome do: produto, serviço ou provedor"
+                placeholder="Nome do cliente"
                 value={fields?.name ?? ""}
                 onChange={(e) =>
                   setFields({
@@ -87,13 +97,47 @@ const ModalCreate = (props: propsModal): JSX.Element => {
                 }
               />
             </label>
-            <label className="flex flex-col w-36 gap-y-1">
-              <span className="text-slate-600">Preço de compra</span>
+            <label className="flex flex-1 flex-col gap-y-1">
+              <span className="text-slate-600">WhatsApp</span>
               <input
                 className="pl-4 border h-12 outline-teal-700"
                 type="text"
-                name="price"
-                placeholder="Ex: 10"
+                name="whatsapp"
+                placeholder="Ex: DD999999999"
+                value={fields?.price ?? ""}
+                onChange={(e) =>
+                  setFields({
+                    ...fields,
+                    [e.target.name]: e.target.value.replace(/\d/g, ""),
+                  })
+                }
+              />
+            </label>
+          </div>
+          <div className="my-2 flex gap-x-2">
+            <label className="flex flex-1 gap-y-1 flex-col">
+              <span className="text-slate-600">Login | E-mail</span>
+              <input
+                className="pl-4 border h-12 outline-teal-700"
+                type="text"
+                name="login"
+                placeholder="Login ou e-mail"
+                value={fields?.name ?? ""}
+                onChange={(e) =>
+                  setFields({
+                    ...fields,
+                    [e.target.name]: e.target.value,
+                  })
+                }
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-y-1">
+              <span className="text-slate-600">Senha</span>
+              <input
+                className="pl-4 border h-12 outline-teal-700"
+                type="text"
+                name="password"
+                placeholder="Senha de acesso"
                 value={fields?.price ?? ""}
                 onChange={(e) =>
                   setFields({
@@ -104,160 +148,102 @@ const ModalCreate = (props: propsModal): JSX.Element => {
               />
             </label>
           </div>
-          <div className="">
-            <div className="flex flex-col">
-              <span className="text-lg">
-                Planos mensais <strong>{listPlans?.length ?? 0}</strong>
-              </span>
-              <small className="text-slate-500 text-base">
-                Deixar sem planos significa que o pagamento pelo:{" "}
-                <strong className="text-slate-800">
-                  {fields?.name && fields?.name !== ""
-                    ? fields?.name
-                    : "Produto/Provedor"}
-                </strong>
-                , é feito apenas uma vez.
-              </small>
-            </div>
-            {listPlans.length ? (
-              <ul className="border-y py-4 gap-2 my-2 flex flex-wrap">
-                {listPlans?.map((plan, i) => (
-                  <li key={i}>
-                    <div className="flex gap-x-2">
-                      <input
-                        onChange={(e) =>
-                          handleValuePlanEdit({
-                            id: plan.id ?? i,
-                            name: e.target.name,
-                            value: e.target.value,
-                          })
-                        }
-                        type="text"
-                        value={plan.name}
-                        name="name"
-                        className="pl-2 border outline-teal-700"
-                      />
-                      <input
-                        onChange={(e) =>
-                          handleValuePlanEdit({
-                            id: plan.id,
-                            name: e.target.name,
-                            value: formatePrice(e.target.value),
-                          })
-                        }
-                        className="border pl-2 w-24 outline-teal-700"
-                        value={plan.price}
-                        type="text"
-                        name="price"
-                      />
-                      <button
-                        onClick={async () => {
-                          if (props.actionDellPlan) {
-                            await props.actionDellPlan(plan.id);
-                          }
-                          setListPlans(
-                            listPlans.filter((item) => item.name !== plan.name)
-                          );
-                        }}
-                        className="text-slate-50 hover:bg-red-600 duration-200 bg-red-700 icon-3 p-1"
-                      >
-                        <IoClose />
-                      </button>
-                      {props.type === "EDIT" &&
-                        listPlans?.some((ini) => {
-                          if (plan.id === ini.id) {
-                            if (
-                              ini.name !== plan.name ||
-                              ini.price !== Number(plan.price)
-                            )
-                              return true;
-                          }
-                        }) && (
-                          <button
-                            onClick={async () => {
-                              if (props.actionSavePlan) {
-                                setLoadSavePlan([...loadSavePlan, plan.name]);
-                                await props.actionSavePlan(plan);
-                                const newListp = listPlans.map((e) => {
-                                  if (e.id === plan.id) return { ...plan };
-                                  return e;
-                                });
-                                console.log(newListp);
-                                setListPlans(newListp);
-                                setLoadSavePlan(
-                                  loadSavePlan.filter((pl) => pl !== plan.name)
-                                );
-                              }
-                            }}
-                            className="text-slate-50 hover:bg-green-600 duration-200 bg-green-500 icon-3 p-1"
-                          >
-                            {loadSavePlan.includes(plan.name) ? (
-                              <LoadComponent />
-                            ) : (
-                              <BiSave />
-                            )}
-                          </button>
-                        )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : undefined}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setListPlans([...listPlans, fieldsPlan]);
-                setFieldsPlan({} as Plans);
-              }}
-              className={`flex ${
-                !listPlans.length ? "mt-3" : ""
-              } items-end gap-x-2`}
-            >
-              <label className="flex flex-1 gap-y-1 flex-col">
-                <span className="text-slate-600">Nome do plano</span>
-                <input
-                  required
-                  autoComplete="off"
-                  className="pl-4 border h-12 outline-teal-700"
-                  type="text"
-                  name="name"
-                  placeholder="Ex: Básico, Premium"
-                  onChange={(e) =>
-                    setFieldsPlan({
-                      ...fieldsPlan,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  value={fieldsPlan.name ?? ""}
-                />
-              </label>
-              <label className="flex flex-col w-36 gap-y-1">
-                <span className="text-slate-600">R$/mensal</span>
-                <input
-                  required
-                  className="pl-4 border h-12 outline-teal-700"
-                  autoComplete="off"
-                  type="text"
-                  name="price"
-                  placeholder="Ex: 5.99"
-                  onChange={(e) =>
-                    setFieldsPlan({
-                      ...fieldsPlan,
-                      [e.target.name]: formatePrice(e.target.value),
-                    })
-                  }
-                  value={fieldsPlan.price ?? ""}
-                />
-              </label>
-              <button
-                type="submit"
-                className="h-12 text-green-500 bg-6 shadow-sm font-medium p-2 px-3 border hover:bg-slate-50 duration-200"
-              >
-                <div className="icon">
-                  <IoIosAdd />
-                </div>
-              </button>
-            </form>
+          <div className="my-2 flex gap-x-2">
+            <label className="flex flex-1 gap-y-1 flex-col">
+              <span className="text-slate-600">Produto | Provedor</span>
+              <Select
+                // defaultValue={selectedOption}
+                // onChange={setSelectedOption}
+                options={options}
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-y-1">
+              <span className="text-slate-600">Plano</span>
+              <Select
+                // defaultValue={selectedOption}
+                // onChange={setSelectedOption}
+                options={options}
+              />
+            </label>
+          </div>
+          <div className="my-2 flex gap-x-2">
+            <label className="flex flex-1 gap-y-1 flex-col">
+              <span className="text-slate-600">Fatura</span>
+              <Select
+                // defaultValue={selectedOption}
+                // onChange={setSelectedOption}
+                options={options}
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-y-1">
+              <span className="text-slate-600">Data de vencimento</span>
+              <DatePicker className="h-9" value={new Date()} />
+            </label>
+          </div>
+          <div className="my-2 flex flex-col items-baseline gap-y-2">
+            <span>Enviar notificações automáticas</span>
+            <label className="flex gap-y-1 items-center gap-x-2">
+              <Switch
+                onChange={() => undefined}
+                onColor="#10967b"
+                offColor="#828282"
+                checkedIcon={false}
+                checked
+              />
+              <span className="text-slate-600">5 dias antes</span>
+            </label>
+          </div>
+          <div className="mt-3 flex flex-col items-baseline gap-y-2">
+            <label className="w-full">
+              <span className="text-slate-600">Observações</span>
+              <textarea
+                onChange={(e) =>
+                  setFields({ ...fields, [e.target.name]: e.target.value })
+                }
+                className="outline-teal-700 border p-1 mt-2 w-full"
+                rows={4}
+                name="comments"
+              />
+            </label>
+          </div>
+          <div className="mt-3 flex flex-col items-baseline gap-y-2">
+            <label className="w-full">
+              <span className="text-slate-600">Observações</span>
+              <textarea
+                onChange={(e) =>
+                  setFields({ ...fields, [e.target.name]: e.target.value })
+                }
+                className="outline-teal-700 border p-1 mt-2 w-full"
+                rows={4}
+                name="comments"
+              />
+            </label>
+          </div>
+          <div className="mt-3 flex flex-col items-baseline gap-y-2">
+            <label className="w-full">
+              <span className="text-slate-600">Observações</span>
+              <textarea
+                onChange={(e) =>
+                  setFields({ ...fields, [e.target.name]: e.target.value })
+                }
+                className="outline-teal-700 border p-1 mt-2 w-full"
+                rows={4}
+                name="comments"
+              />
+            </label>
+          </div>
+          <div className="mt-3 flex flex-col items-baseline gap-y-2">
+            <label className="w-full">
+              <span className="text-slate-600">Observações</span>
+              <textarea
+                onChange={(e) =>
+                  setFields({ ...fields, [e.target.name]: e.target.value })
+                }
+                className="outline-teal-700 border p-1 mt-2 w-full"
+                rows={4}
+                name="comments"
+              />
+            </label>
           </div>
         </div>
 
@@ -305,7 +291,7 @@ const ModalCreate = (props: propsModal): JSX.Element => {
   );
 };
 
-export default function PageProductsPlans() {
+export default function PageCostumer() {
   const [_cookies, _setCookies, removeCookie] = useCookies(["auth"]);
   const dispatch: Dispatch<propsAuthActions> = useDispatch();
   const navigate = useNavigate();
@@ -318,10 +304,6 @@ export default function PageProductsPlans() {
   const [products, setProducts] = useState<Product[]>([] as Product[]);
   const [loadGet, setLoadGet] = useState<boolean>(false as boolean);
   const [loadDell, setLoadDell] = useState<number[]>([] as number[]);
-
-  // const auth = useSelector(
-  //   (state: any): propsInitialState => state._root.entries[0][1]
-  // );
 
   const onList = useCallback(async () => {
     try {
@@ -586,7 +568,7 @@ export default function PageProductsPlans() {
         />
       )}
       <div className="p-4 px-5 flex justify-between items-center bg-teal-900">
-        <h4 className="font-medium text-slate-50">Produtos | Provedores</h4>
+        <h4 className="font-medium text-slate-50">Meus clientes</h4>
         <button
           onClick={() => {
             setOpenModalCreate(true);
@@ -598,8 +580,69 @@ export default function PageProductsPlans() {
         </button>
       </div>
 
-      <div className="mt-6 gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
-        {!loadGet ? (
+      <div className="mt-6 gap-2 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
+        <article
+          className={`gap-y-2 bg-white grid hover:border-slate-600 border w-full duration-200 hover:shadow-md`}
+        >
+          <div
+            className="p-4 cursor-pointer"
+            // onClick={() => setOpenModalEdit(prd)}
+          >
+            <p className="text-slate-600">
+              Nome:{" "}
+              <strong className="text-slate-900">
+                Rian Carlos de Sousa Pinho
+              </strong>
+            </p>
+            <p className="text-slate-600">
+              WhatsApp:{" "}
+              <strong className="text-slate-900">5571986751101</strong>
+            </p>
+            <p className="text-slate-600">
+              Login: <strong className="text-slate-900">sousa20300</strong>
+            </p>
+            <p className="text-slate-600">
+              Provedor: <strong className="text-slate-900">Provedor 1</strong>
+            </p>
+            <p className="text-slate-600">
+              Vencimento: <strong className="text-slate-900">16/06/2023</strong>
+            </p>
+            <p className="text-slate-600">
+              Fatura: <strong className="text-blue-700">Paga</strong>
+            </p>
+            <p className="text-slate-600">
+              Status: <strong className="text-blue-700">Ativo</strong>
+            </p>
+            <p className="text-slate-600">
+              Notificação: <strong className="text-blue-700">Ativo</strong>
+            </p>
+          </div>
+          <div className="flex gap-x-2">
+            <button
+              // disabled={loadDell.includes(prd.id)}
+              // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
+              className="text-red-700 bg-6 flex items-center justify-center font-medium p-2 px-5 border hover:bg-red-50 duration-200 flex-1"
+            >
+              Deletar
+            </button>
+            <button
+              // disabled={loadDell.includes(prd.id)}
+              // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
+              className="text-blue-700 bg-6 flex items-center justify-center font-medium p-2 px-5 icon border hover:bg-blue-50 duration-200 flex-1"
+            >
+              <IoMdNotificationsOutline />
+            </button>
+            <button
+              // disabled={loadDell.includes(prd.id)}
+              // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
+              className="text-green-700 bg-6 flex items-center justify-center font-medium p-2 px-5 icon border hover:bg-green-50 duration-200 flex-1"
+            >
+              <VscDebugRestart />
+            </button>
+          </div>
+        </article>
+
+        {/* {!loadGet ? (
           <>
             <Skeleton
               borderRadius={0}
@@ -670,7 +713,7 @@ export default function PageProductsPlans() {
               </div>
             </article>
           ))
-        )}
+        )} */}
       </div>
     </div>
   );

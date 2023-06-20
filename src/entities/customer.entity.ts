@@ -1,6 +1,6 @@
-type Invoice_T = "PAY" | "PENDING";
+export type Invoice_T = "PAY" | "PENDING";
 
-export interface Message {
+export interface Customer {
   readonly id: number;
   full_name: string;
   whatsapp: string;
@@ -11,5 +11,5 @@ export interface Message {
   comments: string;
   readonly planId: number;
   readonly productId: number;
-  readonly messageId: number;
+  readonly messageId: number[];
 }

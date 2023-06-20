@@ -16,21 +16,22 @@ import { LoadComponent } from "../../components/load";
 import Select from "react-select";
 import DatePicker from "react-date-picker";
 import Switch from "react-switch";
+import { Customer, Invoice_T } from "../../entities/customer.entity";
+import { Message } from "../../entities/message.entity";
 
 const options = [
-  { value: "chocolate", label: "Chocolate" },
-  { value: "strawberry", label: "Strawberry" },
-  { value: "vanilla", label: "Vanilla" },
+  { value: "PAY", label: "Paga" },
+  { value: "PENDING", label: "Pendente" },
 ];
 
 interface propsField_I
-  extends Partial<Omit<Product<(Plans & { id?: number })[]>, "id">> {}
+  extends Partial<Customer & { value_product: string; value_plan: string }> {}
 
 interface propsModal {
   setModal(vl: boolean): void;
   label: string;
   type: "EDIT" | "ADD";
-  initValues?: propsField_I;
+  initValues?: propsField_I & { id?: number };
   action?(fields: Required<Omit<propsField_I, "id">>): Promise<void>;
   actionEdit?(fields: propsField_I): Promise<void>;
   actionSavePlan?(props: Plans): Promise<void>;
@@ -44,30 +45,60 @@ interface propsHandleValuePlanEdit {
 }
 
 const ModalCreate = (props: propsModal): JSX.Element => {
-  const [fields, setFields] = useState<Required<Omit<propsField_I, "plans">>>(
-    props.initValues as Required<Omit<propsField_I, "plans">>
+  const [fields, setFields] = useState<propsField_I & { id?: number }>(
+    props.initValues ?? ({ messageId: [] } as propsField_I & { id?: number })
   );
-  const [listPlans, setListPlans] = useState<Plans[]>(
-    props.initValues?.plans ?? ([] as Plans[])
-  );
+
   const [fieldsPlan, setFieldsPlan] = useState<Plans>({} as Plans);
   const [loadSavePlan, setLoadSavePlan] = useState<string[]>([] as string[]);
 
-  const formatePrice = useCallback((valor: string) => {
-    const numero = parseFloat(valor.replace(/\D/g, "")) / 100;
-    return numero.toFixed(2);
-  }, []);
+  const [products, setProducts] = useState<Omit<Product, "plans">[]>(
+    [] as Omit<Product, "plans">[]
+  );
+  const [loadGetProducts, setLoadGetProducts] = useState<boolean>(
+    false as boolean
+  );
+  const [plans, setPlans] = useState<Plans[]>([] as Plans[]);
+  const [loadGetPlans, setLoadGetPlans] = useState<boolean>(false as boolean);
 
-  const handleValuePlanEdit = useCallback((props: propsHandleValuePlanEdit) => {
-    const newState = produce(listPlans, (draft) => {
-      return draft.map((e) => {
-        if (e.id === props.id) {
-          return { ...e, [props.name]: props.value };
-        }
-        return e;
-      });
-    });
-    setListPlans(newState);
+  const [messages, setMessages] = useState<Message[]>([] as Message[]);
+  const [loadGetMessages, setLoadGetMessages] = useState<boolean>(
+    false as boolean
+  );
+
+  const handleSelectProduct = useCallback(
+    async (id: number, label: string) => {
+      try {
+        const { data } = await mainAPI.get(
+          `/v1/user/get/plans-of-product/${id}`
+        );
+        setPlans(data.data);
+        setFields({ ...fields, productId: id, value_product: label });
+        setLoadGetPlans(true);
+      } catch (error) {
+        setLoadGetPlans(false);
+        console.log(error);
+      }
+    },
+    [fields]
+  );
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [{ data }, { data: dataMessage }] = await Promise.all([
+          mainAPI.get("/v1/user/get/only-products"),
+          mainAPI.get("/v1/user/get/messages"),
+        ]);
+        setProducts(data.data);
+        setMessages(dataMessage.data);
+        setLoadGetMessages(true);
+        setLoadGetProducts(true);
+      } catch (error) {
+        setLoadGetProducts(false);
+        console.log(error);
+      }
+    })();
   }, []);
 
   return (
@@ -86,9 +117,9 @@ const ModalCreate = (props: propsModal): JSX.Element => {
               <input
                 className="pl-4 border h-12 outline-teal-700"
                 type="text"
-                name="name"
+                name="full_name"
                 placeholder="Nome do cliente"
-                value={fields?.name ?? ""}
+                value={fields?.full_name ?? ""}
                 onChange={(e) =>
                   setFields({
                     ...fields,
@@ -103,12 +134,13 @@ const ModalCreate = (props: propsModal): JSX.Element => {
                 className="pl-4 border h-12 outline-teal-700"
                 type="text"
                 name="whatsapp"
-                placeholder="Ex: DD999999999"
-                value={fields?.price ?? ""}
+                placeholder="Ex: 00999999999"
+                maxLength={11}
+                value={fields?.whatsapp ?? ""}
                 onChange={(e) =>
                   setFields({
                     ...fields,
-                    [e.target.name]: e.target.value.replace(/\d/g, ""),
+                    [e.target.name]: e.target.value.replace(/\D/g, ""),
                   })
                 }
               />
@@ -122,7 +154,7 @@ const ModalCreate = (props: propsModal): JSX.Element => {
                 type="text"
                 name="login"
                 placeholder="Login ou e-mail"
-                value={fields?.name ?? ""}
+                value={fields?.login ?? ""}
                 onChange={(e) =>
                   setFields({
                     ...fields,
@@ -138,11 +170,11 @@ const ModalCreate = (props: propsModal): JSX.Element => {
                 type="text"
                 name="password"
                 placeholder="Senha de acesso"
-                value={fields?.price ?? ""}
+                value={fields?.password ?? ""}
                 onChange={(e) =>
                   setFields({
                     ...fields,
-                    [e.target.name]: formatePrice(e.target.value),
+                    [e.target.name]: e.target.value,
                   })
                 }
               />
@@ -152,17 +184,25 @@ const ModalCreate = (props: propsModal): JSX.Element => {
             <label className="flex flex-1 gap-y-1 flex-col">
               <span className="text-slate-600">Produto | Provedor</span>
               <Select
-                // defaultValue={selectedOption}
-                // onChange={setSelectedOption}
-                options={options}
+                onChange={(e) => handleSelectProduct(e?.value!, e?.label!)}
+                options={products.map((pdr) => ({
+                  label: `${pdr.name} - R$${pdr.price}`,
+                  value: pdr.id,
+                }))}
+                placeholder="Selecione"
+                name="product"
               />
             </label>
             <label className="flex flex-1 flex-col gap-y-1">
-              <span className="text-slate-600">Plano</span>
+              <span className="text-slate-600">Plano mensal</span>
               <Select
-                // defaultValue={selectedOption}
-                // onChange={setSelectedOption}
-                options={options}
+                placeholder="Selecione"
+                onChange={(e) => setFields({ ...fields, planId: e?.value! })}
+                options={plans.map((plan) => ({
+                  label: `${plan.name} - R$${plan.price}`,
+                  value: plan.id,
+                }))}
+                name="plan"
               />
             </label>
           </div>
@@ -171,27 +211,87 @@ const ModalCreate = (props: propsModal): JSX.Element => {
               <span className="text-slate-600">Fatura</span>
               <Select
                 // defaultValue={selectedOption}
-                // onChange={setSelectedOption}
+                onChange={(e) =>
+                  setFields({ ...fields, invoice: e?.value as Invoice_T })
+                }
+                value={options.find((e) => e.value === fields.invoice)}
                 options={options}
+                placeholder="Selecione"
               />
             </label>
             <label className="flex flex-1 flex-col gap-y-1">
               <span className="text-slate-600">Data de vencimento</span>
-              <DatePicker className="h-9" value={new Date()} />
+              <DatePicker
+                className="h-9"
+                value={fields?.dueDate ?? new Date()}
+                onChange={(e) =>
+                  setFields({ ...fields, dueDate: new Date(String(e)) })
+                }
+                minDate={new Date()}
+              />
             </label>
           </div>
-          <div className="my-2 flex flex-col items-baseline gap-y-2">
-            <span>Enviar notificações automáticas</span>
-            <label className="flex gap-y-1 items-center gap-x-2">
-              <Switch
-                onChange={() => undefined}
-                onColor="#10967b"
-                offColor="#828282"
-                checkedIcon={false}
-                checked
-              />
-              <span className="text-slate-600">5 dias antes</span>
-            </label>
+          <div className="my-2 mt-7 flex flex-col items-baseline gap-y-2">
+            <span className="text-slate-600">
+              Enviar notificações automáticas
+            </span>
+            <div className="flex gap-2 flex-wrap">
+              {!loadGetMessages ? (
+                <>
+                  <Skeleton
+                    borderRadius={0}
+                    baseColor="#d4d7dc"
+                    highlightColor="#f4f8ff"
+                    width={140}
+                    height={24}
+                  />
+                  <Skeleton
+                    borderRadius={0}
+                    baseColor="#d4d7dc"
+                    highlightColor="#f4f8ff"
+                    width={140}
+                    height={24}
+                  />
+                </>
+              ) : (
+                messages?.map((msg) => (
+                  <label
+                    key={msg?.id}
+                    className={`px-2 flex gap-y-1 items-center gap-x-2 ${
+                      fields?.messageId?.includes(msg.id)
+                        ? "bg-3 text-white"
+                        : "text-slate-600"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      onChange={() => {
+                        if (
+                          fields.messageId &&
+                          fields?.messageId?.includes(msg.id)
+                        ) {
+                          setFields({
+                            ...fields,
+                            messageId: fields.messageId.filter(
+                              (e) => e !== msg.id
+                            ),
+                          });
+                          return;
+                        }
+                        setFields({
+                          ...fields,
+                          messageId: [...fields?.messageId!, msg.id],
+                        });
+                      }}
+                      checked={fields?.messageId?.includes(msg.id)}
+                    />
+                    <span>
+                      {msg?.days} {msg?.days > 1 ? "dias" : "dia"} antes
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
           </div>
           <div className="mt-3 flex flex-col items-baseline gap-y-2">
             <label className="w-full">
@@ -201,47 +301,9 @@ const ModalCreate = (props: propsModal): JSX.Element => {
                   setFields({ ...fields, [e.target.name]: e.target.value })
                 }
                 className="outline-teal-700 border p-1 mt-2 w-full"
-                rows={4}
+                rows={3}
                 name="comments"
-              />
-            </label>
-          </div>
-          <div className="mt-3 flex flex-col items-baseline gap-y-2">
-            <label className="w-full">
-              <span className="text-slate-600">Observações</span>
-              <textarea
-                onChange={(e) =>
-                  setFields({ ...fields, [e.target.name]: e.target.value })
-                }
-                className="outline-teal-700 border p-1 mt-2 w-full"
-                rows={4}
-                name="comments"
-              />
-            </label>
-          </div>
-          <div className="mt-3 flex flex-col items-baseline gap-y-2">
-            <label className="w-full">
-              <span className="text-slate-600">Observações</span>
-              <textarea
-                onChange={(e) =>
-                  setFields({ ...fields, [e.target.name]: e.target.value })
-                }
-                className="outline-teal-700 border p-1 mt-2 w-full"
-                rows={4}
-                name="comments"
-              />
-            </label>
-          </div>
-          <div className="mt-3 flex flex-col items-baseline gap-y-2">
-            <label className="w-full">
-              <span className="text-slate-600">Observações</span>
-              <textarea
-                onChange={(e) =>
-                  setFields({ ...fields, [e.target.name]: e.target.value })
-                }
-                className="outline-teal-700 border p-1 mt-2 w-full"
-                rows={4}
-                name="comments"
+                value={fields?.comments ?? ""}
               />
             </label>
           </div>
@@ -258,23 +320,8 @@ const ModalCreate = (props: propsModal): JSX.Element => {
             onClick={() =>
               props.type === "ADD"
                 ? props.action &&
-                  props.action({
-                    ...fields,
-                    price: Number(fields.price),
-                    plans: listPlans.map((pl) => ({
-                      ...pl,
-                      price: Number(pl.price),
-                    })),
-                  })
-                : props.actionEdit &&
-                  props.actionEdit({
-                    ...(fields.name !== props.initValues?.name && {
-                      name: fields.name,
-                    }),
-                    ...(fields.price !== props.initValues?.price && {
-                      price: Number(fields.price),
-                    }),
-                  })
+                  props.action(fields as Omit<Required<propsField_I>, "id">)
+                : props.actionEdit && undefined
             }
             className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
           >
@@ -296,19 +343,19 @@ export default function PageCostumer() {
   const dispatch: Dispatch<propsAuthActions> = useDispatch();
   const navigate = useNavigate();
 
-  const [openModalEdit, setOpenModalEdit] = useState<null | Product>(
-    null as null | Product
+  const [openModalEdit, setOpenModalEdit] = useState<null | Customer>(
+    null as null | Customer
   );
   const [openModalCreate, setOpenModalCreate] = useState(false);
 
-  const [products, setProducts] = useState<Product[]>([] as Product[]);
+  const [customer, setCustomer] = useState<Customer[]>([] as Customer[]);
   const [loadGet, setLoadGet] = useState<boolean>(false as boolean);
   const [loadDell, setLoadDell] = useState<number[]>([] as number[]);
 
   const onList = useCallback(async () => {
     try {
-      const { data } = await mainAPI.get("/v1/user/get/products");
-      setProducts(data.data);
+      const { data } = await mainAPI.get("/v1/user/get/customers");
+      setCustomer(data.data);
       setTimeout(() => setLoadGet(true), 600);
     } catch (error) {
       setLoadGet(false);
@@ -329,36 +376,23 @@ export default function PageCostumer() {
   }, []);
 
   const onCreate = useCallback(
-    async (fields: Required<propsField_I>) => {
+    async (fields: Omit<Required<propsField_I>, "id">) => {
       try {
-        const { data } = await mainAPI.post(
-          "/v1/user/create/product-service",
-          fields
-        );
+        const { data } = await mainAPI.post("/v1/user/create/customer", {
+          ...fields,
+          value_product: undefined,
+          value_plan: undefined,
+        });
         setOpenModalCreate(false);
         setTimeout(() => {
-          const newState = produce(products, (draft) => {
+          const newState = produce(customer, (draft) => {
             draft.push({
+              ...fields,
               id: data.data.id,
-              name: fields.name,
-              price: fields.price,
-              plans: data.data?.plan?.map(
-                (fi: Omit<Plans, "price">): Plans | null => {
-                  const ind = fields.plans.findIndex(
-                    (fil) => fil.name === fi.name
-                  );
-                  if (fi.name === fields.plans[ind].name) {
-                    return {
-                      ...fields.plans[ind],
-                      id: fi.id,
-                    };
-                  }
-                  return null;
-                }
-              ),
             });
           });
-          setProducts(newState);
+          console.log(newState);
+          setCustomer(newState);
         }, 300);
       } catch (error) {
         if (error instanceof AxiosError) {
@@ -376,106 +410,60 @@ export default function PageCostumer() {
         console.log(error);
       }
     },
-    [products]
+    [customer]
   );
 
-  const onEdit = useCallback(
-    async (fields: propsField_I) => {
-      try {
-        await mainAPI.put(
-          `/v1/user/update/change-field-product/${openModalEdit?.id}?${
-            fields.price ? `&price=${fields.price}` : ""
-          }${fields.name ? `&name=${fields.name}` : ""}`
-        );
-        setOpenModalEdit(null);
-        const newProducts = produce(products, (draft) => {
-          draft.map((pdr) => {
-            if (pdr.id === openModalEdit?.id) {
-              if (fields.name !== undefined) {
-                pdr.name = fields.name;
-              }
-              if (fields.price !== undefined) {
-                pdr.price = fields.price;
-              }
-              return pdr;
-            }
-            return pdr;
-          });
-        });
-        setProducts(newProducts);
-      } catch (error) {
-        if (error instanceof AxiosError) {
-          if (error.response?.status === 401) {
-            dispatch({ type: "LOGOUT" });
-            removeCookie("auth", {
-              maxAge: 2147483647,
-              path: "/",
-            });
-            navigate("/");
-            return;
-          }
-          return;
-        }
-        console.log(error);
-      }
-    },
-    [openModalEdit?.id, products]
-  );
-
-  const onEditPlan = useCallback(
-    async (fields: Plans) => {
-      try {
-        await mainAPI.put(
-          `/v1/user/update/change-field-plan-product/${fields.id}?price=${fields.price}&name=${fields.name}`
-        );
-        const newProducts = produce(products, (draft) => {
-          draft.map((pdr) => {
-            if (pdr.id === openModalEdit?.id) {
-              pdr.plans.map((pl) => {
-                if (pl.id === fields.id) {
-                  if (fields.name !== undefined) {
-                    pl.name = fields.name;
-                  }
-                  if (fields.price !== undefined) {
-                    pl.price = fields.price;
-                  }
-                }
-                return pl;
-              });
-              return pdr;
-            }
-            return pdr;
-          });
-        });
-        setOpenModalEdit(products.find((pdr) => pdr.id === openModalEdit?.id)!);
-        setProducts(newProducts);
-      } catch (error) {
-        if (error instanceof AxiosError) {
-          if (error.response?.status === 401) {
-            dispatch({ type: "LOGOUT" });
-            removeCookie("auth", {
-              maxAge: 2147483647,
-              path: "/",
-            });
-            navigate("/");
-            return;
-          }
-          return;
-        }
-        console.log(error);
-      }
-    },
-    [openModalEdit?.id, products]
-  );
+  // const onEdit = useCallback(
+  //   async (fields: propsField_I) => {
+  //     try {
+  //       await mainAPI.put(
+  //         `/v1/user/update/change-field-product/${openModalEdit?.id}?${
+  //           fields.price ? `&price=${fields.price}` : ""
+  //         }${fields.name ? `&name=${fields.name}` : ""}`
+  //       );
+  //       setOpenModalEdit(null);
+  //       const newProducts = produce(products, (draft) => {
+  //         draft.map((pdr) => {
+  //           if (pdr.id === openModalEdit?.id) {
+  //             if (fields.name !== undefined) {
+  //               pdr.name = fields.name;
+  //             }
+  //             if (fields.price !== undefined) {
+  //               pdr.price = fields.price;
+  //             }
+  //             return pdr;
+  //           }
+  //           return pdr;
+  //         });
+  //       });
+  //       setProducts(newProducts);
+  //     } catch (error) {
+  //       if (error instanceof AxiosError) {
+  //         if (error.response?.status === 401) {
+  //           dispatch({ type: "LOGOUT" });
+  //           removeCookie("auth", {
+  //             maxAge: 2147483647,
+  //             path: "/",
+  //           });
+  //           navigate("/");
+  //           return;
+  //         }
+  //         return;
+  //       }
+  //       console.log(error);
+  //     }
+  //   },
+  //   [openModalEdit?.id, products]
+  // );
 
   const onDelete = useCallback(
     async (id: number) => {
       try {
-        if (confirm("Deseja deletar essa mensagem permanentemente?")) {
+        if (confirm("Deseja deletar esse cliente permanentemente?")) {
           setLoadDell([...loadDell, id]);
-          await mainAPI.delete(`/v1/user/delete/product/${id}`);
+          await mainAPI.delete(`/v1/user/delete/customer/${id}`);
           setTimeout(() => {
-            setProducts(products.filter((e) => e.id !== id));
+            setCustomer(customer.filter((e) => e.id !== id));
             setLoadDell(loadDell.filter((e) => e !== id));
           }, 400);
         }
@@ -483,7 +471,7 @@ export default function PageCostumer() {
         if (error instanceof AxiosError) {
           if (error.response?.status === 400) {
             alert(error.response.data.body[0].message);
-            setProducts(products.filter((e) => e.id !== id));
+            setCustomer(customer.filter((e) => e.id !== id));
             setLoadDell(loadDell.filter((e) => e !== id));
             return;
           }
@@ -502,7 +490,7 @@ export default function PageCostumer() {
         console.log(error);
       }
     },
-    [loadDell, products]
+    [loadDell, customer]
   );
 
   const onDeletePlan = useCallback(
@@ -512,7 +500,7 @@ export default function PageCostumer() {
           setLoadDell([...loadDell, id]);
           await mainAPI.delete(`/v1/user/delete/plan/${id}`);
           setTimeout(() => {
-            setProducts(products.filter((e) => e.id !== id));
+            setCustomer(customer.filter((e) => e.id !== id));
             setLoadDell(loadDell.filter((e) => e !== id));
           }, 400);
         }
@@ -520,7 +508,7 @@ export default function PageCostumer() {
         if (error instanceof AxiosError) {
           if (error.response?.status === 400) {
             alert(error.response.data.body[0].message);
-            setProducts(products.filter((e) => e.id !== id));
+            setCustomer(customer.filter((e) => e.id !== id));
             setLoadDell(loadDell.filter((e) => e !== id));
             return;
           }
@@ -539,7 +527,7 @@ export default function PageCostumer() {
         console.log(error);
       }
     },
-    [loadDell, products]
+    [loadDell, customer]
   );
 
   useEffect(() => {
@@ -552,19 +540,19 @@ export default function PageCostumer() {
         <ModalCreate
           action={onCreate}
           type="ADD"
-          label="Adicionar produto | provedor"
+          label="Adicionar cliente"
           setModal={setOpenModalCreate}
         />
       )}
       {openModalEdit && (
         <ModalCreate
-          actionEdit={onEdit}
+          // actionEdit={onEdit}
           type="EDIT"
-          label="Editar mensagem de vencimento"
+          label="Editar cliente"
           setModal={(vl) => !vl && setOpenModalEdit(null)}
           initValues={openModalEdit}
           actionDellPlan={onDeletePlan}
-          actionSavePlan={onEditPlan}
+          // actionSavePlan={onEditPlan}
         />
       )}
       <div className="p-4 px-5 flex justify-between items-center bg-teal-900">
@@ -581,139 +569,128 @@ export default function PageCostumer() {
       </div>
 
       <div className="mt-6 gap-2 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
-        <article
-          className={`gap-y-2 bg-white grid hover:border-slate-600 border w-full duration-200 hover:shadow-md`}
-        >
-          <div
-            className="p-4 cursor-pointer"
-            // onClick={() => setOpenModalEdit(prd)}
-          >
-            <p className="text-slate-600">
-              Nome:{" "}
-              <strong className="text-slate-900">
-                Rian Carlos de Sousa Pinho
-              </strong>
-            </p>
-            <p className="text-slate-600">
-              WhatsApp:{" "}
-              <strong className="text-slate-900">5571986751101</strong>
-            </p>
-            <p className="text-slate-600">
-              Login: <strong className="text-slate-900">sousa20300</strong>
-            </p>
-            <p className="text-slate-600">
-              Provedor: <strong className="text-slate-900">Provedor 1</strong>
-            </p>
-            <p className="text-slate-600">
-              Vencimento: <strong className="text-slate-900">16/06/2023</strong>
-            </p>
-            <p className="text-slate-600">
-              Fatura: <strong className="text-blue-700">Paga</strong>
-            </p>
-            <p className="text-slate-600">
-              Status: <strong className="text-blue-700">Ativo</strong>
-            </p>
-            <p className="text-slate-600">
-              Notificação: <strong className="text-blue-700">Ativo</strong>
-            </p>
-          </div>
-          <div className="flex gap-x-2">
-            <button
-              // disabled={loadDell.includes(prd.id)}
-              // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
-              className="text-red-700 bg-6 flex items-center justify-center font-medium p-2 px-5 border hover:bg-red-50 duration-200 flex-1"
-            >
-              Deletar
-            </button>
-            <button
-              // disabled={loadDell.includes(prd.id)}
-              // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
-              className="text-blue-700 bg-6 flex items-center justify-center font-medium p-2 px-5 icon border hover:bg-blue-50 duration-200 flex-1"
-            >
-              <IoMdNotificationsOutline />
-            </button>
-            <button
-              // disabled={loadDell.includes(prd.id)}
-              // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
-              className="text-green-700 bg-6 flex items-center justify-center font-medium p-2 px-5 icon border hover:bg-green-50 duration-200 flex-1"
-            >
-              <VscDebugRestart />
-            </button>
-          </div>
-        </article>
-
-        {/* {!loadGet ? (
+        {!loadGet ? (
           <>
             <Skeleton
               borderRadius={0}
               baseColor="#d4d7dc"
               highlightColor="#f4f8ff"
               width={"100%"}
-              height={155}
+              height={306}
             />
             <Skeleton
               borderRadius={0}
               baseColor="#d4d7dc"
               highlightColor="#f4f8ff"
               width={"100%"}
-              height={155}
-            />
-            <Skeleton
-              borderRadius={0}
-              baseColor="#d4d7dc"
-              highlightColor="#f4f8ff"
-              width={"100%"}
-              height={155}
+              height={306}
             />
           </>
         ) : (
-          products.map((prd) => (
+          customer?.map((cust) => (
             <article
-              key={prd.id}
-              className={`hover:bg-gray-50 gap-y-2 bg-white grid hover:border-slate-600 border w-full duration-200 hover:shadow-md`}
+              key={cust.id}
+              className={`gap-y-2 bg-white grid hover:border-slate-600 border w-full duration-200 hover:shadow-md`}
             >
               <div
                 className="p-4 cursor-pointer"
-                onClick={() => setOpenModalEdit(prd)}
+                onClick={() => setOpenModalEdit(cust)}
               >
                 <p className="text-slate-600">
-                  <strong className="text-slate-900">({prd.id})</strong>:{" "}
-                  {prd.name}
+                  Nome:{" "}
+                  <strong className="text-slate-900">{cust.full_name}</strong>
                 </p>
                 <p className="text-slate-600">
-                  Preço de compra:{" "}
-                  <strong className="text-slate-900">R${prd.price}</strong>
+                  WhatsApp:{" "}
+                  <strong className="text-slate-900">55{cust.whatsapp}</strong>
                 </p>
-                {prd.plans.length ? (
-                  <div>
-                    <p className="text-slate-600 gap-x-1 leading-normal flex flex-wrap">
-                      Planos:
-                      {prd.plans?.map((pl) => (
-                        <span key={pl.id}>
-                          <span
-                            key={pl.id}
-                            className="bg-7 break-keep text-white p-0.5 px-2 text-sm"
-                          >
-                            {pl.name}-<strong>R${pl.price}</strong>
-                          </span>{" "}
-                        </span>
-                      ))}
-                    </p>
-                  </div>
-                ) : undefined}
+                <p className="text-slate-600">
+                  Login:{" "}
+                  <strong className="text-slate-900">{cust.login}</strong>
+                </p>
+                <p className="text-slate-600">
+                  Provedor:{" "}
+                  <strong className="text-slate-900">
+                    ({cust.productId}) Provedor 1
+                  </strong>
+                </p>
+                <p className="text-slate-600">
+                  Plano:{" "}
+                  <strong className="text-slate-900">
+                    ({cust.planId}) Plano 1
+                  </strong>
+                </p>
+                <p className="text-slate-600">
+                  Vencimento:{" "}
+                  <strong className="text-slate-900">
+                    {new Date(cust.dueDate).toLocaleDateString("pt-br")}
+                  </strong>
+                </p>
+                <p className="text-slate-600">
+                  Fatura:{" "}
+                  <strong
+                    className={`${
+                      cust.invoice === "PAY"
+                        ? "text-blue-700"
+                        : "text-orange-600"
+                    }`}
+                  >
+                    {cust.invoice === "PAY" ? "Paga" : "Pendente"}
+                  </strong>
+                </p>
+                <p className="text-slate-600">
+                  Status:{" "}
+                  <strong
+                    className={`${
+                      cust.invoice === "PAY"
+                        ? "text-blue-700"
+                        : "text-orange-600"
+                    }`}
+                  >
+                    Ativo
+                  </strong>
+                </p>
+                <p className="text-slate-600">
+                  Notificação:{" "}
+                  <strong
+                    className={`${
+                      cust.invoice === "PAY"
+                        ? "text-blue-700"
+                        : "text-orange-600"
+                    }`}
+                  >
+                    Ativo
+                  </strong>
+                </p>
               </div>
-              <div className="flex">
+              <div className="flex gap-x-2">
                 <button
-                  disabled={loadDell.includes(prd.id)}
-                  onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
-                  className="text-red-700 bg-6 font-medium p-2 px-5 border hover:bg-red-50 duration-200 flex-1"
+                  // disabled={loadDell.includes(prd.id)}
+                  onClick={() =>
+                    !loadDell.includes(cust.id) && onDelete(cust.id)
+                  }
+                  className="text-red-700 bg-6 flex items-center justify-center font-medium p-2 px-5 border hover:bg-red-50 duration-200 flex-1"
                 >
                   Deletar
+                </button>
+                <button
+                  // disabled={loadDell.includes(prd.id)}
+                  // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
+                  className="text-blue-700 bg-6 flex items-center justify-center font-medium p-2 px-5 icon border hover:bg-blue-50 duration-200 flex-1"
+                >
+                  <IoMdNotificationsOutline />
+                </button>
+                <button
+                  // disabled={loadDell.includes(prd.id)}
+                  // onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
+                  className="text-green-700 bg-6 flex items-center justify-center font-medium p-2 px-5 icon border hover:bg-green-50 duration-200 flex-1"
+                >
+                  <VscDebugRestart />
                 </button>
               </div>
             </article>
           ))
-        )} */}
+        )}
       </div>
     </div>
   );

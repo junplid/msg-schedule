@@ -94,7 +94,10 @@ export default function LayoutDashboard() {
                     <li
                       onClick={() => {
                         dispatch({ type: "LOGOUT" });
-                        removeCookie("auth");
+                        removeCookie("auth", {
+                          maxAge: 2147483647,
+                          path: "/",
+                        });
                         navigate("/");
                       }}
                       className="p-3  duration-150 hover:bg-slate-50 cursor-pointer"

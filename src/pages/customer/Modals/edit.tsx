@@ -57,11 +57,11 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
   const [products, setProducts] = useState<Omit<Product, "plans">[]>(
     [] as Omit<Product, "plans">[]
   );
-  const [loadGetProducts, setLoadGetProducts] = useState<boolean>(
+  const [_loadGetProducts, setLoadGetProducts] = useState<boolean>(
     false as boolean
   );
   const [plans, setPlans] = useState<Plans[]>([] as Plans[]);
-  const [loadGetPlans, setLoadGetPlans] = useState<boolean>(false as boolean);
+  const [_loadGetPlans, setLoadGetPlans] = useState<boolean>(false as boolean);
 
   const [messages, setMessages] = useState<Message[]>([] as Message[]);
   const [loadGetMessages, setLoadGetMessages] = useState<boolean>(

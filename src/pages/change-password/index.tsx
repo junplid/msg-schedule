@@ -15,7 +15,7 @@ export default function PageChangePassword() {
 
   const [loadPage, setLoadPage] = useState<boolean>(false as boolean);
   const [loadSendCode, setLoadSendCode] = useState<boolean>(false as boolean);
-  const [loadConfirmCode, setLoadConfirmCode] = useState<boolean>(
+  const [_loadConfirmCode, setLoadConfirmCode] = useState<boolean>(
     false as boolean
   );
   const [sendCode, setSendCode] = useState<boolean>(false as boolean);

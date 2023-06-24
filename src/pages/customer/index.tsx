@@ -104,48 +104,43 @@ export default function PageCostumer() {
     [customer]
   );
 
-  // const onEdit = useCallback(
-  //   async (fields: propsField_I) => {
-  //     try {
-  //       await mainAPI.put(
-  //         `/v1/user/update/change-field-product/${openModalEdit?.id}?${
-  //           fields.price ? `&price=${fields.price}` : ""
-  //         }${fields.name ? `&name=${fields.name}` : ""}`
-  //       );
-  //       setOpenModalEdit(null);
-  //       const newProducts = produce(products, (draft) => {
-  //         draft.map((pdr) => {
-  //           if (pdr.id === openModalEdit?.id) {
-  //             if (fields.name !== undefined) {
-  //               pdr.name = fields.name;
-  //             }
-  //             if (fields.price !== undefined) {
-  //               pdr.price = fields.price;
-  //             }
-  //             return pdr;
-  //           }
-  //           return pdr;
-  //         });
-  //       });
-  //       setProducts(newProducts);
-  //     } catch (error) {
-  //       if (error instanceof AxiosError) {
-  //         if (error.response?.status === 401) {
-  //           dispatch({ type: "LOGOUT" });
-  //           removeCookie("auth", {
-  //             maxAge: 2147483647,
-  //             path: "/",
-  //           });
-  //           navigate("/");
-  //           return;
-  //         }
-  //         return;
-  //       }
-  //       console.log(error);
-  //     }
-  //   },
-  //   [openModalEdit?.id, products]
-  // );
+  const onEdit = useCallback(
+    async ({ id, ...fields }: Customer) => {
+      try {
+        await mainAPI.put(
+          `/v1/user/update/change-field-customer/${id}`,
+          fields
+        );
+        setOpenModalEdit(null);
+        const newProducts = produce(customer, (draft) => {
+          const dd = draft.map((cust) => {
+            if (cust.id === id) {
+              return { ...fields, id };
+            }
+            return cust;
+          });
+          draft = dd;
+          return draft;
+        });
+        setCustomer(newProducts);
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 401) {
+            dispatch({ type: "LOGOUT" });
+            removeCookie("auth", {
+              maxAge: 2147483647,
+              path: "/",
+            });
+            navigate("/");
+            return;
+          }
+          return;
+        }
+        console.log(error);
+      }
+    },
+    [customer]
+  );
 
   const onDelete = useCallback(
     async (id: number) => {
@@ -236,12 +231,11 @@ export default function PageCostumer() {
       )}
       {openModalEdit && (
         <ModalEdit
-          // actionEdit={onEdit}
+          actionEdit={onEdit}
           type="EDIT"
           label="Editar cliente"
           setModal={(vl) => !vl && setOpenModalEdit(null)}
           initValues={openModalEdit}
-          // actionSavePlan={onEditPlan}
         />
       )}
       {openModalNotify !== null && (

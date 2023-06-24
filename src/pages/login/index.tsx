@@ -90,29 +90,37 @@ export default function PageLogin() {
                     )}
                   </div>
                 </label>
-                <label className="flex flex-col gap-y-2">
-                  <span className="text-base font-medium text-slate-800">
-                    Senha
-                  </span>
-                  <div
-                    style={{ maxWidth: 280 }}
-                    className="gap-y-1 flex flex-col"
+                <div className="flex flex-col items-end">
+                  <label className="flex flex-col gap-y-2">
+                    <span className="text-base font-medium text-slate-800">
+                      Senha
+                    </span>
+                    <div
+                      style={{ maxWidth: 280 }}
+                      className="gap-y-1 flex flex-col"
+                    >
+                      <input
+                        disabled={load}
+                        className="py-3 px-4 shadow-sm w-full outline-none"
+                        type="password"
+                        placeholder="*****"
+                        name="password"
+                        onChange={handleValues}
+                      />
+                      {error?.path.includes("password") && (
+                        <p className="text-red-600 bg-red-200 px-1">
+                          {error.message}
+                        </p>
+                      )}
+                    </div>
+                  </label>
+                  <Link
+                    to={"/change-password"}
+                    className="text-base font-medium text-cyan-800 mt-1 block"
                   >
-                    <input
-                      disabled={load}
-                      className="py-3 px-4 shadow-sm w-full outline-none"
-                      type="password"
-                      placeholder="*****"
-                      name="password"
-                      onChange={handleValues}
-                    />
-                    {error?.path.includes("password") && (
-                      <p className="text-red-600 bg-red-200 px-1">
-                        {error.message}
-                      </p>
-                    )}
-                  </div>
-                </label>
+                    Esqueceu a senha?
+                  </Link>
+                </div>
               </div>
               <button
                 disabled={load}

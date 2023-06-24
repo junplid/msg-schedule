@@ -1,5 +1,4 @@
 import { useCollapse } from "react-collapsed";
-import { RiAdminLine } from "react-icons/ri";
 import { AiOutlineWhatsApp } from "react-icons/ai";
 import { HiChevronDown } from "react-icons/hi";
 import "./styles.scss";
@@ -74,7 +73,7 @@ export default function LayoutDashboardComponentAside() {
   const { pathname } = useLocation();
 
   return (
-    <aside className="w-52 pt-11 pb-5 px-3 shadow-lg bg-6 h-screen overflow-y-auto overflow-x-hidden">
+    <aside className="w-52 pt-11 pb-5 px-3 shadow-lg bg-6 min-h-screen overflow-y-auto overflow-x-hidden">
       <div className="mb-4">
         <h2 className="text-xl font-bold text-slate-700 text-center">
           MsgSchedule
@@ -119,14 +118,8 @@ export default function LayoutDashboardComponentAside() {
           itens={[
             { link: "/panel/whatsapp/my-section", value: "Minha sessão" },
             { link: "/panel/whatsapp/message", value: "Mensagens" },
-            { link: "/panel/whatsapp/shots", value: "Disparos" },
           ]}
           label="WhatsApp"
-        />
-        <CollapseItem
-          Icon={RiAdminLine}
-          itens={[{ link: "/panel/root/subscribers", value: "Assinantes" }]}
-          label="Root"
         />
       </div>
     </aside>

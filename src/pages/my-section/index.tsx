@@ -14,7 +14,7 @@ export default function PageMySectionWhatsApp() {
   const [stateSession, setStateSession] = useState<null | boolean>(null);
 
   const socket = useMemo(() => {
-    return io("http://localhost:3001");
+    return io("https://a60e-177-128-192-93.ngrok-free.app");
   }, []);
 
   const auth = useSelector(

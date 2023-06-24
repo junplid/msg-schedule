@@ -443,11 +443,16 @@ export default function PageProductsPlans() {
   const onEditPlan = useCallback(
     async (fields: Plans) => {
       try {
-        await mainAPI.put(
-          `/v1/user/update/change-field-plan-product/${fields.id}?price=${fields.price}&name=${fields.name}`
+        const { data } = await mainAPI.put(
+          `/v1/user/update/change-field-plan-product/${openModalEdit?.id}?${
+            fields.price ? `price=${fields.price}&` : ""
+          }${fields.name ? `name=${fields.name}` : ""}`,
+          {
+            idPlan: fields.id ?? undefined,
+          }
         );
         const newProducts = produce(products, (draft) => {
-          draft.map((pdr) => {
+          const dd = draft.map((pdr) => {
             if (pdr.id === openModalEdit?.id) {
               pdr.plans.map((pl) => {
                 if (pl.id === fields.id) {
@@ -457,6 +462,8 @@ export default function PageProductsPlans() {
                   if (fields.price !== undefined) {
                     pl.price = fields.price;
                   }
+                } else {
+                  pdr.plans.push({ ...fields, id: data.data });
                 }
                 return pl;
               });
@@ -464,8 +471,12 @@ export default function PageProductsPlans() {
             }
             return pdr;
           });
+
+          draft = dd;
+          return draft;
         });
-        setOpenModalEdit(products.find((pdr) => pdr.id === openModalEdit?.id)!);
+        setOpenModalEdit(null);
+        console.log(newProducts);
         setProducts(newProducts);
       } catch (error) {
         if (error instanceof AxiosError) {
@@ -493,7 +504,15 @@ export default function PageProductsPlans() {
           setLoadDell([...loadDell, id]);
           await mainAPI.delete(`/v1/user/delete/product/${id}`);
           setTimeout(() => {
-            setProducts(products.filter((e) => e.id !== id));
+            const newProducts = produce(products, (draft) => {
+              draft.map((pdr) => {
+                if (pdr.id === openModalEdit?.id) {
+                  return pdr.plans.filter((pl) => pl.id !== id);
+                }
+                return pdr;
+              });
+            });
+            setProducts(newProducts);
             setLoadDell(loadDell.filter((e) => e !== id));
           }, 400);
         }
@@ -520,7 +539,7 @@ export default function PageProductsPlans() {
         console.log(error);
       }
     },
-    [loadDell, products]
+    [loadDell, products, openModalEdit?.id]
   );
 
   const onDeletePlan = useCallback(

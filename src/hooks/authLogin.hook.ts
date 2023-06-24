@@ -41,6 +41,7 @@ export function useLogin() {
         mainAPI.defaults.headers.common.authorization = `BEARER ${data.data.token}`;
         navigate("/panel");
       } catch (error) {
+        console.log(error);
         setLoad(false);
         if (error instanceof AxiosError) {
           setError(error.response?.data?.body[0]);

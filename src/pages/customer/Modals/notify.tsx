@@ -1,8 +1,15 @@
-import { useState } from "react";
+import { Dispatch, useCallback, useEffect, useState } from "react";
 import { useCollapse } from "react-collapsed";
 import { HiChevronDown } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import { LoadComponent } from "../../../components/load";
+import { Message } from "../../../entities/message.entity";
+import mainAPI from "../../../providers/api.provider";
+import { AxiosError } from "axios";
+import { propsAuthActions } from "../../../reducers/auth.reducer";
+import { useCookies } from "react-cookie";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 interface propsField_I {
   text: string;
@@ -26,10 +33,43 @@ interface propsModal {
 }
 
 export const ModalNotify = (props: propsModal): JSX.Element => {
+  const [_cookies, _setCookies, removeCookie] = useCookies(["auth"]);
+  const navigate = useNavigate();
+  const dispatch: Dispatch<propsAuthActions> = useDispatch();
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({});
   const [fields, setFields] = useState("" as string);
   const [load, setLoad] = useState<boolean>(false as boolean);
   const [send, setSend] = useState<number>(3 as number);
+
+  const [messages, setMessages] = useState<Message[]>([] as Message[]);
+  const [loadGet, setLoadGet] = useState<boolean>(false as boolean);
+
+  const onList = useCallback(async () => {
+    try {
+      const { data } = await mainAPI.get("/v1/user/get/messages");
+      setMessages(data.data);
+      setTimeout(() => setLoadGet(true), 600);
+    } catch (error) {
+      setLoadGet(false);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          dispatch({ type: "LOGOUT" });
+          removeCookie("auth", {
+            maxAge: 2147483647,
+            path: "/",
+          });
+          navigate("/");
+          return;
+        }
+        return;
+      }
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    onList();
+  }, []);
 
   return (
     <div className="py-5 flex justify-center items-center flex-col fixed top-0 left-0 w-screen h-screen">
@@ -38,12 +78,23 @@ export const ModalNotify = (props: propsModal): JSX.Element => {
           <span>
             Enviar notificação para{" "}
             <strong>
-              {props.info.full_name}:{props.info.whatsapp}
+              {props.info.full_name}: <small>{props.info.whatsapp}</small>
             </strong>
           </span>
           <button className="icon-2" onClick={() => props.setModal(null)}>
             <IoClose />
           </button>
+        </div>
+        <div className="px-5 flex flex-wrap gap-3 mt-3">
+          {messages.map((msg) => (
+            <button
+              onClick={() => setFields(msg.text)}
+              key={msg.id}
+              className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
+            >
+              Mensagem de {msg.days}dias
+            </button>
+          ))}
         </div>
         <label className="mt-5 px-5 block">
           <span className="text-slate-600">Mensagem</span>

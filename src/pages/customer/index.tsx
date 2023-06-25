@@ -5,7 +5,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import mainAPI from "../../providers/api.provider";
-import { propsAuthActions } from "../../reducers/auth.reducer";
+import { authReducer, propsAuthActions } from "../../reducers/auth.reducer";
 import { produce } from "immer";
 import { VscDebugRestart } from "react-icons/vsc";
 import Skeleton from "react-loading-skeleton";
@@ -98,6 +98,12 @@ export default function PageCostumer() {
             navigate("/");
             return;
           }
+          if (error.response?.status === 400) {
+            throw {
+              message: error.response?.data.body[0].message,
+              field: error.response?.data.body[0].context.key,
+            };
+          }
           return;
         }
         console.log(error);
@@ -117,7 +123,7 @@ export default function PageCostumer() {
         const newProducts = produce(customer, (draft) => {
           const dd = draft.map((cust) => {
             if (cust.id === id) {
-              return { ...fields, id };
+              return { ...fields, id, value_plan: "", value_product: "" };
             }
             return cust;
           });
@@ -303,21 +309,27 @@ export default function PageCostumer() {
                 </p>
                 <p className="text-slate-600">
                   Provedor:{" "}
-                  <strong className="text-slate-900">
-                    ({cust.productId}) {cust.value_product}
-                  </strong>
+                  {cust?.productId && (
+                    <strong className="text-slate-900">
+                      ({cust.productId}) {cust.value_product}
+                    </strong>
+                  )}
                 </p>
                 <p className="text-slate-600">
                   Plano:{" "}
-                  <strong className="text-slate-900">
-                    ({cust.planId}) {cust.value_plan}
-                  </strong>
+                  {cust?.planId && (
+                    <strong className="text-slate-900">
+                      ({cust.planId}) {cust.value_plan}
+                    </strong>
+                  )}
                 </p>
                 <p className="text-slate-600">
                   Vencimento:{" "}
-                  <strong className="text-slate-900">
-                    {new Date(cust.dueDate).toLocaleDateString("pt-br")}
-                  </strong>
+                  {cust.dueDate && (
+                    <strong className="text-slate-900">
+                      {new Date(cust.dueDate).toLocaleDateString("pt-br")}
+                    </strong>
+                  )}
                 </p>
                 <p className="text-slate-600">
                   Fatura:{" "}

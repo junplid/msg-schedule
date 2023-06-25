@@ -54,10 +54,9 @@ export default function LayoutDashboard() {
           mainAPI.defaults.headers.common.authorization = `BEARER ${cookies.auth}`;
           setTimeout(() => setLoadPage(true), 1000);
         } catch (error) {
-          console.log(error);
-          // dispatch({ type: "LOGOUT" });
-          // removeCookie("auth");
-          // navigate("/");
+          dispatch({ type: "LOGOUT" });
+          removeCookie("auth");
+          navigate("/");
         }
       })();
       return;

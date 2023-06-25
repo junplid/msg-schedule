@@ -7,6 +7,7 @@ import DatePicker from "react-date-picker";
 import { Plans, Product } from "../../../entities/product.entity";
 import { Customer, Invoice_T } from "../../../entities/customer.entity";
 import { Message } from "../../../entities/message.entity";
+import { LoadComponent } from "../../../components/load";
 
 const options = [
   { value: "PAY", label: "Paga" },
@@ -16,6 +17,10 @@ const options = [
 interface propsField_I
   extends Partial<Customer & { value_product: string; value_plan: string }> {}
 
+interface propsError_I {
+  message: string;
+  field: string;
+}
 interface propsModal {
   setModal(vl: boolean): void;
   label: string;
@@ -31,6 +36,11 @@ export const ModalCreate = (props: propsModal): JSX.Element => {
   const [fields, setFields] = useState<propsField_I & { id?: number }>(
     props.initValues ?? ({ messageId: [] } as propsField_I & { id?: number })
   );
+  const [error, setError] = useState<propsError_I | null>(
+    null as propsError_I | null
+  );
+
+  const [loadCreate, setLoadCreate] = useState<boolean>(false as boolean);
 
   // const [fieldsPlan, setFieldsPlan] = useState<Plans>({} as Plans);
   // const [loadSavePlan, setLoadSavePlan] = useState<string[]>([] as string[]);
@@ -110,6 +120,11 @@ export const ModalCreate = (props: propsModal): JSX.Element => {
                   })
                 }
               />
+              {error?.field === "full_name" && (
+                <p className="text-red-600 bg-red-200 max-w-xs px-1">
+                  {error.message}
+                </p>
+              )}
             </label>
             <label className="flex flex-1 flex-col gap-y-1">
               <span className="text-slate-600">WhatsApp</span>
@@ -127,6 +142,11 @@ export const ModalCreate = (props: propsModal): JSX.Element => {
                   })
                 }
               />
+              {error?.field === "whatsapp" && (
+                <p className="text-red-600 bg-red-200 max-w-xs px-1">
+                  {error.message}
+                </p>
+              )}
             </label>
           </div>
           <div className="my-2 flex gap-x-2">
@@ -206,7 +226,7 @@ export const ModalCreate = (props: propsModal): JSX.Element => {
               <span className="text-slate-600">Data de vencimento</span>
               <DatePicker
                 className="h-9"
-                value={fields?.dueDate ?? new Date()}
+                value={fields?.dueDate}
                 onChange={(e) =>
                   setFields({ ...fields, dueDate: new Date(String(e)) })
                 }
@@ -300,16 +320,24 @@ export const ModalCreate = (props: propsModal): JSX.Element => {
             Cancelar
           </button>
           <button
-            onClick={() =>
-              props.type === "ADD"
-                ? props.action &&
-                  props.action(fields as Omit<Required<propsField_I>, "id">)
-                : props.actionEdit && undefined
-            }
+            onClick={async () => {
+              if (props.type === "ADD") {
+                if (props.action) {
+                  setLoadCreate(true);
+                  await props
+                    .action(fields as Omit<Required<propsField_I>, "id">)
+                    .catch((e) => {
+                      console.log(e);
+                      setError(e);
+                    });
+                  setLoadCreate(false);
+                  return;
+                }
+              }
+            }}
             className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
           >
-            {props.type === "ADD" && "Criar"}
-            {props.type === "EDIT" && "Salvar"}
+            {loadCreate ? <LoadComponent /> : "Adicionar"}
           </button>
         </div>
       </div>

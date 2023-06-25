@@ -307,7 +307,7 @@ export default function PageMessageWhatsApp() {
         <ModalCreate
           actions={onCreate}
           type="ADD"
-          label="Criar nova mensagem de vencimento"
+          label="Criar nova mensagem"
           setModal={setOpenModalCreate}
         />
       )}
@@ -315,7 +315,7 @@ export default function PageMessageWhatsApp() {
         <ModalCreate
           actions={onEdit}
           type="EDIT"
-          label="Editar mensagem de vencimento"
+          label="Editar mensagem"
           setModal={(vl) => !vl && setOpenModalEdit(null)}
           initValues={openModalEdit}
         />
@@ -324,9 +324,7 @@ export default function PageMessageWhatsApp() {
 
       <div className="mt-6 bg-6">
         <div className="p-4 px-5 flex justify-between items-center bg-teal-900">
-          <h4 className="font-medium text-slate-50">
-            Mensagens automáticas de vencimento
-          </h4>
+          <h4 className="font-medium text-slate-50">Mensagens automáticas</h4>
           <button
             onClick={() => {
               setOpenModalCreate(true);

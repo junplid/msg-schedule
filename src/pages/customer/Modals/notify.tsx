@@ -42,7 +42,7 @@ export const ModalNotify = (props: propsModal): JSX.Element => {
   const [send, setSend] = useState<number>(3 as number);
 
   const [messages, setMessages] = useState<Message[]>([] as Message[]);
-  const [loadGet, setLoadGet] = useState<boolean>(false as boolean);
+  const [_loadGet, setLoadGet] = useState<boolean>(false as boolean);
 
   const onList = useCallback(async () => {
     try {

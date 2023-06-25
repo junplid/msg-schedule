@@ -205,7 +205,7 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
             <label className="flex flex-1 gap-y-1 flex-col">
               <span className="text-slate-600">Produto | Provedor</span>
               <Select
-                value={selectedDefaultProduct}
+                value={selectedDefaultProduct ?? undefined}
                 onChange={(e) => handleSelectProduct(e?.value!, e?.label!)}
                 options={products.map((pdr) => ({
                   label: `${pdr.name} - R$${pdr.price}`,
@@ -218,7 +218,7 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
             <label className="flex flex-1 flex-col gap-y-1">
               <span className="text-slate-600">Plano mensal</span>
               <Select
-                value={selectedDefaultPlan}
+                value={selectedDefaultPlan ?? undefined}
                 placeholder="Selecione"
                 onChange={(e) => {
                   setSelectedDefaultPlan({
@@ -252,7 +252,7 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
               <span className="text-slate-600">Data de vencimento</span>
               <DatePicker
                 className="h-9"
-                value={fields?.dueDate ?? new Date()}
+                value={fields?.dueDate}
                 onChange={(e) =>
                   setFields({ ...fields, dueDate: new Date(String(e)) })
                 }

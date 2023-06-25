@@ -90,6 +90,9 @@ export default function PageUser() {
             navigate("/");
             return;
           }
+          if (error.response?.status === 500) {
+            alert(error.response.data.message);
+          }
           setError(error.response?.data?.query[0]);
           return;
         }

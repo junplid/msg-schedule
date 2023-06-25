@@ -5,7 +5,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import mainAPI from "../../providers/api.provider";
-import { authReducer, propsAuthActions } from "../../reducers/auth.reducer";
+import { propsAuthActions } from "../../reducers/auth.reducer";
 import { produce } from "immer";
 import { VscDebugRestart } from "react-icons/vsc";
 import Skeleton from "react-loading-skeleton";

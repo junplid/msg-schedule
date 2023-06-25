@@ -14,7 +14,7 @@ export default function PageMySectionWhatsApp() {
   const [stateSession, setStateSession] = useState<null | boolean>(null);
 
   const socket = useMemo(() => {
-    return io("https://10fa-177-128-192-93.ngrok-free.app", {
+    return io("https://ad81-177-128-192-93.ngrok-free.app", {
       extraHeaders: {
         "ngrok-skip-browser-warning": "1",
       },

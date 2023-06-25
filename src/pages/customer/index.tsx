@@ -39,7 +39,9 @@ export default function PageCostumer() {
   const [openModalNotify, setOpenModalNotify] =
     useState<propsModalNotfity_I | null>(null as propsModalNotfity_I | null);
 
-  const [customer, setCustomer] = useState<Customer[]>([] as Customer[]);
+  const [customer, setCustomer] = useState<
+    (Customer & { value_plan: string; value_product: string })[]
+  >([] as (Customer & { value_plan: string; value_product: string })[]);
   const [loadGet, setLoadGet] = useState<boolean>(false as boolean);
   const [loadDell, setLoadDell] = useState<number[]>([] as number[]);
   const [stateSession, setStateSession] = useState<null | boolean>(null);
@@ -302,13 +304,13 @@ export default function PageCostumer() {
                 <p className="text-slate-600">
                   Provedor:{" "}
                   <strong className="text-slate-900">
-                    ({cust.productId}) Provedor 1
+                    ({cust.productId}) {cust.value_product}
                   </strong>
                 </p>
                 <p className="text-slate-600">
                   Plano:{" "}
                   <strong className="text-slate-900">
-                    ({cust.planId}) Plano 1
+                    ({cust.planId}) {cust.value_plan}
                   </strong>
                 </p>
                 <p className="text-slate-600">

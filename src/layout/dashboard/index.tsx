@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import LayoutDashboardComponentAside from "./components/aside";
 import { FaUserCircle } from "react-icons/fa";
 import "./styles.scss";
@@ -115,7 +115,7 @@ export default function LayoutDashboard() {
       <LayoutDashboardComponentAside />
       <div className="flex-1 overflow-x-hidden">
         {!loadPage ? (
-          <div className="flex items-center gap-y-2 flex-col justify-center w-full h-full bg-3">
+          <div className="flex items-center gap-y-2 flex-col justify-center w-full h-full bg-secundary">
             <span className="text-slate-50 font-medium text-lg">
               Checando integridade
             </span>
@@ -124,7 +124,7 @@ export default function LayoutDashboard() {
         ) : (
           <>
             <header
-              className={`shadow-md shadow-slate-400 relative gap-x-5 bg-3 flex items-center ${
+              className={`shadow-md shadow-slate-400 relative gap-x-5 bg-primary flex items-center ${
                 auth.user?.type !== "root" ? "justify-between" : "justify-end"
               } pl-5`}
             >
@@ -174,9 +174,12 @@ export default function LayoutDashboard() {
                   >
                     <ul className="w-40">
                       <li className="border-b duration-150 hover:bg-slate-50">
-                        <Link to={"/panel/user"} className="p-3 block">
+                        <div
+                          onClick={() => navigate("/panel/user")}
+                          className="p-3 block"
+                        >
                           Perfil
-                        </Link>
+                        </div>
                       </li>
                       <li
                         onClick={() => {

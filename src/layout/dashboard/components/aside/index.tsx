@@ -30,7 +30,7 @@ function CollapseItem(props: PropsCollapse_I) {
       >
         <div
           className={`${
-            props.itens.some((e) => pathname === e.link) ? "text-sky-700" : ""
+            props.itens.some((e) => pathname === e.link) ? "text-primary" : ""
           } flex items-center duration-200`}
         >
           <div className="w-6 items-center flex">
@@ -51,8 +51,8 @@ function CollapseItem(props: PropsCollapse_I) {
           <li key={item.value} className="group">
             <Link
               to={item.link}
-              className={`group-hover:text-sky-700 ${
-                pathname === item.link ? "text-sky-700" : ""
+              className={`group-hover:text-primary ${
+                pathname === item.link ? "text-primary" : ""
               } gap-x-2 flex duration-200 w-full pl-2 py-1 items-center`}
             >
               <div
@@ -69,21 +69,25 @@ function CollapseItem(props: PropsCollapse_I) {
   );
 }
 
+import LogoImg from "../../../../../public/logo-vertica.png";
+
 export default function LayoutDashboardComponentAside() {
   const { pathname } = useLocation();
 
   return (
     <aside className="w-52 pt-11 pb-5 px-3 shadow-lg bg-6 min-h-screen overflow-y-auto overflow-x-hidden">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-slate-700 text-center">
-          MsgSchedule
-        </h2>
+      <div className="mb-4 flex justify-center items-center">
+        <img
+          src={LogoImg}
+          alt="logo"
+          style={{ maxWidth: 130, height: "auto" }}
+        />
       </div>
       <div className="flex flex-col">
         <Link
           to={"/panel"}
-          className={`group-hover:text-sky-700 ${
-            pathname === "/panel" ? "text-sky-700" : ""
+          className={`group-hover:text-primary ${
+            pathname === "/panel" ? "text-primary" : ""
           } flex duration-200 w-full py-1 items-center`}
         >
           <div className="w-6 items-center flex icon-4">
@@ -93,8 +97,8 @@ export default function LayoutDashboardComponentAside() {
         </Link>
         <Link
           to={"/panel/products-plans"}
-          className={`group-hover:text-sky-700 ${
-            pathname === "/panel/products-plans" ? "text-sky-700" : ""
+          className={`group-hover:text-primary ${
+            pathname === "/panel/products-plans" ? "text-primary" : ""
           } flex duration-200 w-full py-1 items-center`}
         >
           <div className="w-6 items-center flex icon-4">
@@ -104,8 +108,8 @@ export default function LayoutDashboardComponentAside() {
         </Link>
         <Link
           to={"/panel/customer"}
-          className={`group-hover:text-sky-700 ${
-            pathname === "/panel/customer" ? "text-sky-700" : ""
+          className={`group-hover:text-primary ${
+            pathname === "/panel/customer" ? "text-primary" : ""
           } flex duration-200 w-full py-1 items-center`}
         >
           <div className="w-6 items-center flex icon-4">

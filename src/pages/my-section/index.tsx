@@ -12,13 +12,22 @@ export default function PageMySectionWhatsApp() {
   const [qrCode, setQrCode] = useState<string | null>(null as string | null);
   const [loadGetQrCode, setLoadGetQrCode] = useState(false);
   const [stateSession, setStateSession] = useState<null | boolean>(null);
+  const [stateSocket, setStateSocket] = useState<null | boolean>(null);
 
   const socket = useMemo(() => {
-    return io("https://77ff-177-128-192-93.ngrok-free.app", {
+    const sio = io("https://cbe1-177-128-192-93.ngrok-free.app", {
       extraHeaders: {
         "ngrok-skip-browser-warning": "1",
       },
     });
+    sio.on("connect_error", () => {
+      setStateSocket(false);
+      sio.close();
+    });
+    sio.on("connect", () => {
+      setStateSocket(true);
+    });
+    return sio;
   }, []);
 
   const auth = useSelector(
@@ -26,7 +35,7 @@ export default function PageMySectionWhatsApp() {
   );
 
   const createSession = useCallback(() => {
-    socket.emit("create-session", {
+    socket?.emit("create-session", {
       key: String(auth.user?.id),
     });
     setLoadGetQrCode(true);
@@ -34,7 +43,7 @@ export default function PageMySectionWhatsApp() {
   }, [auth.user?.id]);
 
   const closeSession = useCallback(() => {
-    socket.emit("close-session", {
+    socket?.emit("close-session", {
       key: String(auth.user?.id),
     });
     setIsSessionOpen(false);
@@ -51,19 +60,17 @@ export default function PageMySectionWhatsApp() {
 
   useEffect(() => {
     try {
-      (async () => {})();
-
-      socket.on(String(auth.user?.id)!, (data) => {
+      socket?.on(String(auth.user?.id)!, (data) => {
         setQrCode(data);
         setLoadGetQrCode(false);
       });
-      socket.on("leave", (room) => {
+      socket?.on("leave", (room) => {
         if (room === String(auth.user?.id)) {
           setQrCode(null);
           setIsSessionOpen(false);
         }
       });
-      socket.on("sucess-connetion", (data) => {
+      socket?.on("sucess-connetion", (data) => {
         getStateSessionWhatsApp();
         setLoadGetQrCode(false);
         setIsSessionConnected(data);
@@ -80,38 +87,48 @@ export default function PageMySectionWhatsApp() {
     <div>
       <h3 className="font-bold text-xl">Seção WhatsApp</h3>
 
-      <div className="mt-6 flex flex-col gap-y-2 items-baseline">
-        <span
-          className={`block p-2 px-6 font-medium shadow-md ${
-            stateSession === false
-              ? "bg-red-300 text-red-800"
-              : "bg-green-300 text-green-800"
-          } text-lg`}
-        >
-          {stateSession === false ? "Desconectado" : "Conectado"}
-        </span>
+      {stateSocket ? (
+        <div className="mt-6 flex flex-col gap-y-2 items-baseline">
+          <span
+            className={`block p-2 px-6 font-medium shadow-md ${
+              stateSession === false
+                ? "bg-red-300 text-red-800"
+                : "bg-green-300 text-green-800"
+            } text-lg`}
+          >
+            {stateSession === false ? "Desconectado" : "Conectado"}
+          </span>
 
-        {qrCode && <img src={qrCode} alt="QRCode" />}
+          {qrCode && <img src={qrCode} alt="QRCode" />}
 
-        {isConnected && stateSession === false && (
-          <>
-            <button
-              onClick={() => (isSessionOpen ? closeSession() : createSession())}
-              className="text-sky-700 bg-6 shadow-sm font-medium mt-3 p-2 px-5 border hover:bg-slate-50 duration-200"
-            >
-              {!loadGetQrCode ? (
-                isSessionOpen && isSessionConnected ? (
-                  "Desligar"
+          {isConnected && stateSession === false && (
+            <>
+              <button
+                onClick={() =>
+                  isSessionOpen ? closeSession() : createSession()
+                }
+                className="text-sky-700 bg-6 shadow-sm font-medium mt-3 p-2 px-5 border hover:bg-slate-50 duration-200"
+              >
+                {!loadGetQrCode ? (
+                  isSessionOpen && isSessionConnected ? (
+                    "Desligar"
+                  ) : (
+                    "Criar conexão"
+                  )
                 ) : (
-                  "Criar conexão"
-                )
-              ) : (
-                <LoadComponent />
-              )}
-            </button>
-          </>
-        )}
-      </div>
+                  <LoadComponent />
+                )}
+              </button>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="flex">
+          <span className="bg-red-300 text-red-800 p-2 mt-6 block">
+            Conexão indisponível
+          </span>
+        </div>
+      )}
     </div>
   );
 }

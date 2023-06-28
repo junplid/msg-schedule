@@ -15,7 +15,17 @@ export default {
         "5": "#EBF1F2",
         "6": "#fdfdfd",
         "7": "rgba(3, 105, 161, 1)",
-        "8": "#EFFFFF"
+        "8": "#EFFFFF",
+        "primary": "#003496",
+        "secundary": "#03276C"
+      },
+      colors: {
+        "primary": "#003496",
+        "secundary": "#03276C"
+      },
+      borderColor: {
+        "primary": "#003496",
+        "secundary": "#03276C"
       }
     },
   },

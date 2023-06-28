@@ -108,7 +108,7 @@ export default function PageUser() {
 
   return (
     <div className="bg-white">
-      <div className="p-4 px-5 flex justify-between items-center bg-teal-900">
+      <div className="p-4 px-5 flex justify-between items-center bg-primary">
         <h4 className="font-medium text-slate-50">Meus dados</h4>
       </div>
 

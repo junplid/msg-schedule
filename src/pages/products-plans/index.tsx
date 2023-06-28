@@ -604,22 +604,24 @@ export default function PageProductsPlans() {
           actionSavePlan={onEditPlan}
         />
       )}
-      <div className="p-4 px-5 flex justify-between items-center bg-teal-900">
+      <h3 className="font-bold text-xl">Produtos e Serviços</h3>
+
+      <div className="p-4 mt-6 px-5 flex justify-between items-center bg-secundary">
         <h4 className="font-medium text-slate-50">Produtos | Provedores</h4>
         <button
           onClick={() => {
             setOpenModalCreate(true);
             setOpenModalEdit(null);
           }}
-          className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
+          className="text-secundary bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
         >
           Adicionar
         </button>
       </div>
 
-      <div className="mt-6 gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
+      <div>
         {!loadGet ? (
-          <>
+          <div className="gap-2 mt-3 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
             <Skeleton
               borderRadius={0}
               baseColor="#d4d7dc"
@@ -641,54 +643,64 @@ export default function PageProductsPlans() {
               width={"100%"}
               height={155}
             />
-          </>
-        ) : (
-          products.map((prd) => (
-            <article
-              key={prd.id}
-              className={`hover:bg-gray-50 gap-y-2 bg-white grid hover:border-slate-600 border w-full duration-200 hover:shadow-md`}
-            >
-              <div
-                className="p-4 cursor-pointer"
-                onClick={() => setOpenModalEdit(prd)}
+          </div>
+        ) : products.length ? (
+          <div className="mt-6 gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
+            {products.map((prd) => (
+              <article
+                key={prd.id}
+                className={`hover:bg-gray-50 gap-y-2 bg-white justify-between flex flex-col hover:border-slate-600 border w-full duration-200 hover:shadow-md`}
               >
-                <p className="text-slate-600">
-                  <strong className="text-slate-900">({prd.id})</strong>:{" "}
-                  {prd.name}
-                </p>
-                <p className="text-slate-600">
+                <div
+                  className="p-4 cursor-pointer"
+                  onClick={() => setOpenModalEdit(prd)}
+                >
+                  <p className="text-slate-600">
+                    <strong className="text-slate-900">({prd.id})</strong>:{" "}
+                    {prd.name}
+                  </p>
+                  {/* <p className="text-slate-600">
                   Preço de compra:{" "}
                   <strong className="text-slate-900">R${prd.price}</strong>
-                </p>
-                {prd.plans.length ? (
-                  <div>
-                    <p className="text-slate-600 gap-x-1 leading-normal flex flex-wrap">
-                      Planos:
-                      {prd.plans?.map((pl) => (
-                        <span key={pl.id}>
-                          <span
-                            key={pl.id}
-                            className="bg-7 break-keep text-white p-0.5 px-2 text-sm"
-                          >
-                            {pl.name}-<strong>R${pl.price}</strong>
-                          </span>{" "}
-                        </span>
-                      ))}
-                    </p>
-                  </div>
-                ) : undefined}
-              </div>
-              <div className="flex">
-                <button
-                  disabled={loadDell.includes(prd.id)}
-                  onClick={() => !loadDell.includes(prd.id) && onDelete(prd.id)}
-                  className="text-red-700 bg-6 font-medium p-2 px-5 border hover:bg-red-50 duration-200 flex-1"
-                >
-                  Deletar
-                </button>
-              </div>
-            </article>
-          ))
+                </p> */}
+                  {prd.plans.length ? (
+                    <div>
+                      <p className="text-slate-600 gap-x-1 flex flex-wrap">
+                        Planos:
+                        {prd.plans?.map((pl) => (
+                          <span key={pl.id}>
+                            <span
+                              key={pl.id}
+                              className="bg-7 break-keep text-white p-0.5 px-2 text-sm"
+                            >
+                              {pl.name}-<strong>R${pl.price}</strong>
+                            </span>{" "}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                  ) : undefined}
+                </div>
+                <div className="flex">
+                  <button
+                    disabled={loadDell.includes(prd.id)}
+                    onClick={() =>
+                      !loadDell.includes(prd.id) && onDelete(prd.id)
+                    }
+                    className="text-red-700 bg-6 font-medium h-10 p-2 px-5 border hover:bg-red-50 duration-200 flex-1"
+                  >
+                    Deletar
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white h-20 flex justify-center items-center">
+            <span className="text-slate-600">
+              Não há produtos/serviços cadastrados
+            </span>
+          </div>
         )}
       </div>
     </div>

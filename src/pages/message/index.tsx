@@ -323,14 +323,14 @@ export default function PageMessageWhatsApp() {
       <h3 className="font-bold text-xl">Mensagens</h3>
 
       <div className="mt-6 bg-6">
-        <div className="p-4 px-5 flex justify-between items-center bg-teal-900">
+        <div className="p-4 px-5 flex justify-between items-center bg-secundary">
           <h4 className="font-medium text-slate-50">Mensagens automáticas</h4>
           <button
             onClick={() => {
               setOpenModalCreate(true);
               setOpenModalEdit(null);
             }}
-            className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
+            className="text-secundary bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
           >
             Adicionar nova mensagem
           </button>

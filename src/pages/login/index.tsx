@@ -44,14 +44,14 @@ export default function PageLogin() {
   return (
     <div className="min-h-screen py-5 px-4 flex items-center justify-center">
       {!loadPage ? (
-        <div className="p-4 bg-3 flex items-center flex-col gap-3">
+        <div className="p-4 bg-primary flex items-center flex-col gap-3">
           <span className="text-slate-50 font-medium text-lg">Aguarde</span>
           <LoadComponent />
         </div>
       ) : (
-        <div className="flex bg-2 shadow-md">
+        <div className="flex bg-primary shadow-md">
           <img
-            src={"/mobile_message.png"}
+            src={"/logo-horizontal-white.png"}
             alt="svg"
             className="md:block hidden img_message p-10"
           />
@@ -116,7 +116,7 @@ export default function PageLogin() {
                   </label>
                   <Link
                     to={"/change-password"}
-                    className="text-base font-medium text-cyan-800 mt-1 block"
+                    className="text-base font-medium text-primary mt-1 block"
                   >
                     Esqueceu a senha?
                   </Link>
@@ -125,7 +125,7 @@ export default function PageLogin() {
               <button
                 disabled={load}
                 type="submit"
-                className="w-full flex justify-center items-center bg-3 text-slate-100 py-0 h-12 font-semibold hover:bg-2 duration-200"
+                className="w-full flex justify-center items-center bg-primary text-slate-100 py-0 h-12 font-semibold hover:bg-secundary duration-200"
               >
                 {load ? <LoadComponent /> : "Entrar"}
               </button>
@@ -133,7 +133,7 @@ export default function PageLogin() {
             <div>
               <p className="text-slate-700 text-base text-center">
                 Não tem conta?{" "}
-                <Link className="text-cyan-800 font-medium" to={"/register"}>
+                <Link className="text-primary font-medium" to={"/register"}>
                   registre-se
                 </Link>
               </p>

@@ -77,7 +77,7 @@ export default function PageRegister() {
     <div className="min-h-screen py-5 px-4 flex items-center justify-center">
       <div className="w-full flex justify-center fixed bottom-0 left-0">
         <div
-          className={`bg-3 duration-200 ${
+          className={`bg-primary duration-200 ${
             sucess ? "" : "translate-y-16"
           } text-slate-100 p-4 inline-block text-lg`}
         >
@@ -85,14 +85,14 @@ export default function PageRegister() {
         </div>
       </div>
       {!loadPage ? (
-        <div className="p-4 bg-3 flex items-center flex-col gap-3">
+        <div className="p-4 bg-primary flex items-center flex-col gap-3">
           <span className="text-slate-50 font-medium text-lg">Aguarde</span>
           <LoadComponent />
         </div>
       ) : (
-        <div className="flex bg-2 shadow-md">
+        <div className="flex bg-primary shadow-md">
           <img
-            src={"/mobile_message.png"}
+            src={"/logo-horizontal-white.png"}
             alt="svg"
             className="md:block hidden img_message p-10"
           />
@@ -151,7 +151,7 @@ export default function PageRegister() {
               <button
                 disabled={load}
                 type="submit"
-                className="w-full flex justify-center items-center bg-3 text-slate-100 py-0 h-12 font-semibold hover:bg-2 duration-200"
+                className="w-full flex justify-center items-center bg-primary text-slate-100 py-0 h-12 font-semibold hover:bg-secundary duration-200"
               >
                 {load ? <LoadComponent /> : "Criar conta"}
               </button>
@@ -159,7 +159,7 @@ export default function PageRegister() {
             <div>
               <p className="text-slate-700 text-base text-center">
                 Possui conta?{" "}
-                <Link className="text-cyan-800 font-medium" to={"/"}>
+                <Link className="text-primary font-medium" to={"/"}>
                   login
                 </Link>
               </p>

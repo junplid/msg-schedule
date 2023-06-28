@@ -81,6 +81,11 @@ export default function PageMySectionWhatsApp() {
     } catch (error) {
       console.log(error);
     }
+
+    return () => {
+      socket.close();
+      console.log("FECHOU");
+    };
   }, []);
 
   return (

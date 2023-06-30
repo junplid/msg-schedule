@@ -72,9 +72,9 @@ export const ModalNotify = (props: propsModal): JSX.Element => {
   }, []);
 
   return (
-    <div className="py-5 flex justify-center items-center flex-col fixed top-0 left-0 w-screen h-screen">
+    <div className="z-50 py-5 flex justify-center items-center flex-col fixed top-0 left-0 w-screen h-screen">
       <div className="max-w-2xl w-full bg-white shadow-lg relative z-10 anima">
-        <div className="p-5 bg-3 text-slate-100 flex justify-between items-center text-lg">
+        <div className="p-5 bg-primary text-slate-100 flex justify-between items-center text-lg">
           <span>
             Enviar notificação para{" "}
             <strong>

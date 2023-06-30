@@ -92,14 +92,13 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
           mainAPI.get("/v1/user/get/only-products"),
           mainAPI.get("/v1/user/get/messages"),
         ]);
-        console.log(fields);
         if (fields?.productId) {
           const { data: DefaultPlan } = await mainAPI.get(
             `/v1/user/get/plans-of-product/${fields.productId}`
           );
           const pdr = data.data.find((pp: any) => pp.id === fields.productId);
           const pl = DefaultPlan.data.find(
-            (pp: any) => pp.id === fields.productId
+            (pp: any) => pp.id === fields.planId
           );
           setPlans(DefaultPlan.data);
           setSelectedDefaultProduct({
@@ -123,9 +122,9 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
   }, []);
 
   return (
-    <div className="py-5 flex items-center flex-col overflow-scroll overflow-x-hidden fixed top-0 left-0 w-screen h-full">
+    <div className="z-50 py-5 flex items-center flex-col overflow-scroll overflow-x-hidden fixed top-0 left-0 w-screen h-full">
       <div className="max-w-2xl w-full m-auto bg-white shadow-lg relative z-10 anima">
-        <div className="p-5 bg-3 text-white flex justify-between items-center font-medium text-lg">
+        <div className="p-5 bg-primary text-white flex justify-between items-center font-medium text-lg">
           <span>{props.label}</span>
           <button className="icon-2" onClick={() => props.setModal(false)}>
             <IoClose />
@@ -155,8 +154,7 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
                 className="pl-4 border h-12 outline-teal-700"
                 type="text"
                 name="whatsapp"
-                placeholder="Ex: 00999999999"
-                maxLength={11}
+                placeholder="Ex: 0000999999999"
                 value={fields?.whatsapp ?? ""}
                 onChange={(e) =>
                   setFields({

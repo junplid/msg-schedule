@@ -10,6 +10,7 @@ import PageProductsPlans from "./pages/products-plans";
 import PageCostumer from "./pages/customer";
 import PageChangePassword from "./pages/change-password";
 import PageUser from "./pages/user";
+import PageFinance from "./pages/finance";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/register" element={<PageRegister />} />
       <Route path="/" element={<LayoutDashboard />}>
         <Route path="/panel/user" element={<PageUser />} />
+        <Route path="/panel/finance" element={<PageFinance />} />
         <Route path="/panel" element={<PagePanel />} />
         <Route path="/panel/customer" element={<PageCostumer />} />
         <Route path="/panel/products-plans" element={<PageProductsPlans />} />

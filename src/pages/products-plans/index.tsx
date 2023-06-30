@@ -63,7 +63,7 @@ const ModalCreate = (props: propsModal): JSX.Element => {
   return (
     <div className="py-5 flex items-center flex- overflow-scroll overflow-x-hidden fixed top-0 left-0 w-screen h-screen">
       <div className="max-w-2xl m-auto w-full bg-white shadow-lg relative z-10 anima">
-        <div className="p-5 bg-3 text-white flex justify-between items-center font-medium text-lg">
+        <div className="p-5 bg-primary text-white flex justify-between items-center font-medium text-lg">
           <span>{props.label}</span>
           <button className="icon-2" onClick={() => props.setModal(false)}>
             <IoClose />

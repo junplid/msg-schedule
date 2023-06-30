@@ -70,6 +70,7 @@ function CollapseItem(props: PropsCollapse_I) {
 }
 
 import LogoImg from "../../../../../public/logo-vertica.png";
+import { TbZoomMoney } from "react-icons/tb";
 
 export default function LayoutDashboardComponentAside() {
   const { pathname } = useLocation();
@@ -105,6 +106,17 @@ export default function LayoutDashboardComponentAside() {
             <FiServer />
           </div>
           <span className="text-lg">Produtos/Planos</span>
+        </Link>
+        <Link
+          to={"/panel/finance"}
+          className={`group-hover:text-primary ${
+            pathname === "/panel/finance" ? "text-primary" : ""
+          } flex duration-200 w-full py-1 items-center`}
+        >
+          <div className="w-6 items-center flex">
+            <TbZoomMoney size={21} />
+          </div>
+          <span className="text-lg">Financeiro</span>
         </Link>
         <Link
           to={"/panel/customer"}

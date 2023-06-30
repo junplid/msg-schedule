@@ -182,7 +182,7 @@ export default function PageChangePassword() {
                       className="gap-y-1 flex flex-col"
                     >
                       <input
-                        placeholder={!sendCode ? "00000000000" : "Código"}
+                        placeholder={!sendCode ? "5500000000000" : "Código"}
                         className="py-3 px-4 shadow-sm w-full outline-none"
                         type="text"
                         name="email"

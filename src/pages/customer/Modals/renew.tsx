@@ -25,9 +25,9 @@ export const ModalRenew = (props: propsModal): JSX.Element => {
   const [sucess, setSucess] = useState<boolean>(false as boolean);
 
   return (
-    <div className="py-5 flex items-center flex-col overflow-scroll overflow-x-hidden fixed top-0 left-0 w-screen h-full">
+    <div className="z-50 py-5 flex items-center flex-col overflow-scroll overflow-x-hidden fixed top-0 left-0 w-screen h-full">
       <div className="max-w-2xl w-full m-auto bg-white shadow-lg relative z-10 anima">
-        <div className="p-5 bg-3 text-white flex justify-between items-center font-medium text-lg">
+        <div className="p-5 bg-primary text-white flex justify-between items-center font-medium text-lg">
           <span>Renovação cliente</span>
           <button className="icon-2" onClick={() => props.setModal(null)}>
             <IoClose />

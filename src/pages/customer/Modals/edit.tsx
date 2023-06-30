@@ -75,7 +75,18 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
           `/v1/user/get/plans-of-product/${id}`
         );
         setPlans(data.data);
-        setFields({ ...fields, productId: id, value_product: label });
+        setSelectedDefaultProduct({ label, value: id });
+        setSelectedDefaultPlan({
+          label: `${data.data[0].name} - ${data.data[0].price}`,
+          value: data.data[0].id,
+        });
+        setFields({
+          ...fields,
+          productId: id,
+          value_product: label,
+          planId: data.data[0].id,
+          value_plan: data.data[0].name,
+        });
         setLoadGetPlans(true);
       } catch (error) {
         setLoadGetPlans(false);
@@ -349,8 +360,6 @@ export const ModalEdit = (props: propsModal): JSX.Element => {
                 setLoadSaveCust(true);
                 props.actionEdit({
                   ...fields,
-                  value_plan: undefined,
-                  value_product: undefined,
                 });
                 setLoadSaveCust(true);
               }

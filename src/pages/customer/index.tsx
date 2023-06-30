@@ -206,17 +206,25 @@ export default function PageCostumer() {
   );
 
   const onEdit = useCallback(
-    async ({ id, ...fields }: Customer) => {
+    async ({
+      id,
+      value_plan,
+      value_product,
+      ...fields
+    }: Customer & { value_plan: string; value_product: string }) => {
       try {
         await mainAPI.put(`/v1/user/update/change-field-customer/${id}`, {
           ...fields,
-          comments: fields.comments ?? undefined,
+          comments:
+            fields.comments === "" || !fields.comments
+              ? undefined
+              : fields.comments,
         });
         setOpenModalEdit(null);
         const newProducts = produce(customer, (draft) => {
           const dd = draft.map((cust) => {
             if (cust.id === id) {
-              return { ...fields, id, value_plan: "", value_product: "" };
+              return { ...fields, id, value_plan, value_product };
             }
             return cust;
           });
@@ -598,16 +606,6 @@ export default function PageCostumer() {
                       WhatsApp:{" "}
                       <strong className="text-slate-900">
                         {cust.whatsapp}
-                      </strong>
-                    </p>
-                    <p className="text-slate-600">
-                      Login:{" "}
-                      <strong className="text-slate-900">{cust.login}</strong>
-                    </p>
-                    <p className="text-slate-600">
-                      Senha:{" "}
-                      <strong className="text-slate-900">
-                        {cust.password}
                       </strong>
                     </p>
                     <p className="text-slate-600">

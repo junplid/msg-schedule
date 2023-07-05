@@ -353,18 +353,20 @@ export default function PageMessageWhatsApp() {
                 <tbody>
                   {messages.map((e) => (
                     <tr
-                      onClick={() => {
-                        setOpenModalEdit({
-                          ...e,
-                          text: e.text.replace(/\\n/g, "\n"),
-                        });
-                      }}
                       key={e.id}
                       className={`${
                         loadDell.includes(e.id) ? "opacity-70" : ""
                       } duration-200 border-b last:border-0 hover:bg-slate-100 cursor-pointer`}
                     >
-                      <td className="pl-8 pr-4 py-4">
+                      <td
+                        onClick={() => {
+                          setOpenModalEdit({
+                            ...e,
+                            text: e.text.replace(/\\n/g, "\n"),
+                          });
+                        }}
+                        className="pl-8 pr-4 py-4"
+                      >
                         <div>
                           <h3 className="font-medium text-slate-700">
                             Menssagem de {e.days} dias antes do vencimento

@@ -354,7 +354,10 @@ export default function PageMessageWhatsApp() {
                   {messages.map((e) => (
                     <tr
                       onClick={() => {
-                        setOpenModalEdit(e);
+                        setOpenModalEdit({
+                          ...e,
+                          text: e.text.replace(/\\n/g, "\n"),
+                        });
                       }}
                       key={e.id}
                       className={`${

@@ -49,7 +49,7 @@ const ModalCreate = (props: propsModal): JSX.Element => {
             onChange={(e) =>
               setFields({
                 ...fields,
-                [e.target.name]: e.target.value.replace(/\n\g/, "\\n"),
+                [e.target.name]: e.target.value.replace(/\n/g, "\\n"),
               })
             }
             className="outline-teal-700 border p-1 mt-3 w-full"

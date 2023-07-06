@@ -42,6 +42,7 @@ interface propsModalRenew_I {
 interface onRenewCustomer_I {
   customerId: number;
   newDate: Date;
+  message?: string;
 }
 
 const options_invoice = [
@@ -171,15 +172,13 @@ export default function PageCostumer() {
           value_plan: undefined,
         });
         setOpenModalCreate(false);
-        setTimeout(() => {
-          const newState = produce(customer, (draft) => {
-            draft.push({
-              ...fields,
-              id: data.data,
-            });
+        const newState = produce(customer, (draft) => {
+          draft.push({
+            ...fields,
+            id: data.data,
           });
-          setCustomer(newState);
-        }, 300);
+        });
+        setCustomer(newState);
       } catch (error) {
         if (error instanceof AxiosError) {
           if (error.response?.status === 401) {

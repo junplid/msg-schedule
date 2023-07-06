@@ -199,7 +199,13 @@ export const ModalCreate = (props: propsModal): JSX.Element => {
               <span className="text-slate-600">Plano mensal</span>
               <Select
                 placeholder="Selecione"
-                onChange={(e) => setFields({ ...fields, planId: e?.value! })}
+                onChange={(e) =>
+                  setFields({
+                    ...fields,
+                    planId: e?.value!,
+                    value_plan: e?.label,
+                  })
+                }
                 options={plans.map((plan) => ({
                   label: `${plan.name} - R$${plan.price}`,
                   value: plan.id,
@@ -323,10 +329,10 @@ export const ModalCreate = (props: propsModal): JSX.Element => {
               if (props.type === "ADD") {
                 if (props.action) {
                   setLoadCreate(true);
+                  console.log(fields);
                   await props
                     .action(fields as Omit<Required<propsField_I>, "id">)
                     .catch((e) => {
-                      console.log(e);
                       setError(e);
                     });
                   setLoadCreate(false);

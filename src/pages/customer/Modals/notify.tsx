@@ -1,15 +1,9 @@
-import { Dispatch, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCollapse } from "react-collapsed";
 import { HiChevronDown } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import { LoadComponent } from "../../../components/load";
-import { Message } from "../../../entities/message.entity";
-import mainAPI from "../../../providers/api.provider";
-import { AxiosError } from "axios";
-import { propsAuthActions } from "../../../reducers/auth.reducer";
 import { useCookies } from "react-cookie";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 interface propsField_I {
   text: string;
@@ -32,44 +26,51 @@ interface propsModal {
   actions(fields: propsField_I): Promise<boolean>;
 }
 
+interface preMadeMessages_I {
+  message: string;
+  label: string;
+}
+
 export const ModalNotify = (props: propsModal): JSX.Element => {
-  const [_cookies, _setCookies, removeCookie] = useCookies(["auth"]);
-  const navigate = useNavigate();
-  const dispatch: Dispatch<propsAuthActions> = useDispatch();
+  const [_cookies, _setCookies] = useCookies(["pre_made_messages"]);
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({});
   const [fields, setFields] = useState("" as string);
   const [load, setLoad] = useState<boolean>(false as boolean);
   const [send, setSend] = useState<number>(3 as number);
 
-  // const [messages, setMessages] = useState<Message[]>([] as Message[]);
-  const [_loadGet, setLoadGet] = useState<boolean>(false as boolean);
+  const [preMessages, setPreMessages] = useState<preMadeMessages_I[]>(
+    [] as preMadeMessages_I[]
+  );
 
-  // const onList = useCallback(async () => {
-  //   try {
-  //     const { data } = await mainAPI.get("/v1/user/get/messages");
-  //     setMessages(data.data);
-  //     setTimeout(() => setLoadGet(true), 600);
-  //   } catch (error) {
-  //     setLoadGet(false);
-  //     if (error instanceof AxiosError) {
-  //       if (error.response?.status === 401) {
-  //         dispatch({ type: "LOGOUT" });
-  //         removeCookie("auth", {
-  //           maxAge: 2147483647,
-  //           path: "/",
-  //         });
-  //         navigate("/");
-  //         return;
-  //       }
-  //       return;
-  //     }
-  //     console.log(error);
-  //   }
-  // }, []);
+  const [fieldLabel, setFieldLabel] = useState<string>("" as string);
 
-  // useEffect(() => {
-  //   onList();
-  // }, []);
+  useEffect(() => {
+    setPreMessages(_cookies.pre_made_messages ?? []);
+  }, []);
+
+  const handleAppendPreMessage = useCallback(
+    (label: string) => {
+      setFieldLabel("");
+      setPreMessages([{ label, message: fields }, ...preMessages]);
+      _setCookies(
+        "pre_made_messages",
+        JSON.stringify([
+          { label, message: fields } as preMadeMessages_I,
+          ...preMessages,
+        ])
+      );
+    },
+    [fields, preMessages]
+  );
+
+  const handleRemovePreMsg = useCallback(
+    (label: string) => {
+      const newList = preMessages.filter((e) => e.label !== label);
+      setPreMessages(newList);
+      _setCookies("pre_made_messages", JSON.stringify(newList));
+    },
+    [fields, preMessages]
+  );
 
   return (
     <div className="z-50 py-5 flex justify-center items-center flex-col fixed top-0 left-0 w-screen h-screen">
@@ -85,27 +86,64 @@ export const ModalNotify = (props: propsModal): JSX.Element => {
             <IoClose />
           </button>
         </div>
-        <div className="px-5 flex flex-wrap gap-3 mt-3">
-          {/* {messages.map((msg) => (
-            <button
-              onClick={() => setFields(msg.text)}
-              key={msg.id}
-              className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
-            >
-              Mensagem de {msg.days}dias
-            </button>
-          ))} */}
-        </div>
-        <label className="mt-5 px-5 block">
+        {!!preMessages.length && (
+          <div className="px-5 mt-3">
+            <span className="text-slate-600 block mb-2">Mensagens prontas</span>
+            <div className="flex flex-wrap gap-3 gap-y-4 mt-3">
+              {preMessages?.map((msg) => (
+                <div key={msg.label} className="flex flex-col items-center ">
+                  <button
+                    onClick={() => setFields(msg.message)}
+                    key={msg.label}
+                    className="text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200"
+                    title={msg.message}
+                  >
+                    {msg.label}
+                  </button>
+                  <a
+                    onClick={() => handleRemovePreMsg(msg.label)}
+                    className="hover:text-red-500 text-red-300 cursor-pointer underline block"
+                  >
+                    remover
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <label className="mt-2 px-5 block">
           <span className="text-slate-600">Mensagem</span>
           <textarea
             value={fields.replace(/\\n/g, "\n")}
             onChange={(e) => setFields(e.target.value)}
             className="outline-teal-700 border p-1 mt-3 w-full"
-            rows={9}
+            rows={7}
             name="text"
           />
         </label>
+        {fields.length > 0 && !preMessages.find((e) => e.message === fields) ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAppendPreMessage(fieldLabel);
+            }}
+            className="flex items-end gap-5 px-5 my-4 mt-3"
+          >
+            <label className="flex flex-1 flex-col gap-y-1">
+              <input
+                className="pl-4 border h-10 outline-sky-700"
+                type="text"
+                name="label"
+                placeholder="Identificador"
+                value={fieldLabel}
+                onChange={(e) => setFieldLabel(e.target.value)}
+              />
+            </label>
+            <button className="h-10 text-sky-700 bg-6 shadow-sm font-medium p-2 px-5 border hover:bg-slate-50 duration-200">
+              Salvar pré-menssagem
+            </button>
+          </form>
+        ) : undefined}
         <div className="px-5 mt-3 pb-5">
           <div className="bg-7 mt-2">
             <button
@@ -169,7 +207,7 @@ export const ModalNotify = (props: propsModal): JSX.Element => {
               if (!load) {
                 setLoad(true);
                 const status = await props.actions({
-                  text: fields,
+                  text: fields.replace(/\n/g, "\\n"),
                   id: props.info.id,
                 });
                 setLoad(false);
@@ -188,7 +226,7 @@ export const ModalNotify = (props: propsModal): JSX.Element => {
       </div>
       <div
         onClick={() => props.setModal(null)}
-        className="fixed top-0 left-0 w-screen h-screen bg-3 backdrop-blur-sm bg-teal-900/60"
+        className="fixed top-0 left-0 w-screen h-screen backdrop-blur-sm bg-teal-900/60"
       ></div>
     </div>
   );

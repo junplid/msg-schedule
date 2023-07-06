@@ -1,0 +1,14 @@
+.load {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 3px solid;
+  border-color: #ffffff;
+  border-right-color: #07476d;
+  animation: s2 0.3s infinite linear;
+  @keyframes s2 {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+}

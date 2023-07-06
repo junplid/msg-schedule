@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const mainAPI = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: "https://api.mensageiroweb.com",
 });
 
 export default mainAPI;

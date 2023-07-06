@@ -596,7 +596,7 @@ export default function PageCostumer() {
                     onClick={() => setOpenModalEdit(cust)}
                   >
                     <p className="text-slate-600">
-                      Nome:{" "}
+                      ({cust.id}) Nome:{" "}
                       <strong className="text-slate-900">
                         {cust.full_name}
                       </strong>
